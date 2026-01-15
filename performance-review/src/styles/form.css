@@ -7,7 +7,7 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 400;
-  color: #111827;
+  /* color: #111827; */
   margin-bottom: 0.5rem;
   word-wrap: break-word;
 }
@@ -21,22 +21,83 @@
   word-wrap: break-word;
 }
 
-.form-input {
+.form-input,
+.custom-select-header {
   width: 100%;
-  padding: 0.75rem 0.875rem;
+  height: 42px; /* Fixed height to ensure symmetry */
+  padding: 0 0.875rem; /* Removed top/bottom padding to let height/flex handle it */
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  outline: none;
-  transition: all 0.2s;
   background-color: white;
-  color: #111827;
-  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box; /* Crucial for matching sizes */
+  outline: none;
 }
 
 .form-input:focus {
   border-color: #14b8a6;
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+.custom-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-header {
+  justify-content: space-between;
+  cursor: pointer;
+  color: #111827;
+}
+
+.custom-select-header.placeholder {
+  color: #9ca3af;
+}
+
+/* Dropdown list */
+.custom-select-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.custom-select-option {
+  padding: 0.75rem 0.875rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+/* Light Green Hover - Removes blue highlight */
+.custom-select-option:hover {
+  background-color: #f0fdfa;
+  color: #14b8a6;
+}
+
+.select-arrow {
+  width: 16px;
+  height: 16px;
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+}
+
+.select-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Helper to prevent text from wrapping and breaking height */
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .form-input::placeholder {
@@ -138,7 +199,7 @@
   background-position: right 0.875rem center;
   padding-right: 2.5rem;
   cursor: pointer;
-  color: #111827;
+  /* color: #111827; */
 }
 
 .form-select option {
@@ -180,4 +241,61 @@
   cursor: pointer;
   border: none;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.custom-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-header {
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.custom-select-header.placeholder {
+  color: #9ca3af;
+}
+
+.custom-select-dropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  overflow: hidden;
+}
+
+.custom-select-option {
+  padding: 0.75rem 0.875rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* THIS IS YOUR LIGHT GREEN HOVER */
+.custom-select-option:hover {
+  background-color: #f0fdfa; /* Very light green (Tailwind teal-50) */
+  color: #14b8a6; /* Darker green text */
+}
+
+.select-arrow {
+  width: 16px;
+  transition: transform 0.2s;
+}
+
+.select-arrow.open {
+  transform: rotate(180deg);
 }
