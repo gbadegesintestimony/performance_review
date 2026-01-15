@@ -5,8 +5,8 @@
   box-shadow: none;
   padding: 0;
   border: none;
-  margin-bottom: 2rem;
-  padding-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -24,6 +24,7 @@
   display: flex;
   align-items: center;
   gap: 0.625rem;
+  flex-wrap: wrap;
 }
 
 .section-title-bold {
@@ -34,6 +35,7 @@
   width: 1.25rem;
   height: 1.25rem;
   color: #14b8a6;
+  flex-shrink: 0;
 }
 
 .section-subtitle {
@@ -47,9 +49,115 @@
 .section-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1.25rem;
   gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Add Button Container */
+.add-button-container {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.add-button {
+  color: #0c0c0c;
+  font-size: 0.875rem;
+  font-weight: 400;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  white-space: nowrap;
+  padding: 0;
+}
+
+.add-button:hover {
+  color: #0d9488;
+}
+
+.add-button:active {
+  transform: scale(0.98);
+}
+
+/* Comment Container - For first item to look like a container */
+.comment-container {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.comment-container .form-label-small {
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .section {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .section-title {
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+
+  .section-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .add-button-container {
+    width: 100%;
+    padding: 0.875rem;
+  }
+
+  .add-button {
+    width: 100%;
+  }
+
+  .comment-container {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .item-container {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .competency-item {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .competency-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .competency-title {
+    width: 100%;
+  }
+
+  .competency-stars {
+    width: 100%;
+  }
 }
 
 /* Add Button Container */

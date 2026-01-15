@@ -6,6 +6,7 @@
   margin-top: 1.25rem;
   gap: 0.25rem;
   padding: 0 0.5rem;
+  overflow-x: auto;
 }
 
 .rating-item {
@@ -14,6 +15,7 @@
   align-items: center;
   gap: 0.625rem;
   flex: 1;
+  min-width: 60px;
 }
 
 .rating-button {
@@ -22,10 +24,18 @@
   cursor: pointer;
   padding: 0.25rem;
   transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
 }
 
 .rating-button:hover {
   transform: scale(1.1);
+}
+
+.rating-button:active {
+  transform: scale(0.95);
 }
 
 .rating-star {
@@ -48,6 +58,30 @@
 .rating-label {
   font-size: 0.6875rem;
   color: #6b7280;
+  text-align: center;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+@media (max-width: 640px) {
+  .rating-container {
+    gap: 0.1rem;
+    padding: 0;
+  }
+
+  .rating-item {
+    min-width: 50px;
+  }
+
+  .rating-star {
+    width: 1.625rem;
+    height: 1.625rem;
+  }
+
+  .rating-label {
+    font-size: 0.625rem;
+  }
+}
   text-align: center;
   line-height: 1.2;
   max-width: 4rem;
