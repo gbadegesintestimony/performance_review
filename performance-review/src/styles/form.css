@@ -116,7 +116,8 @@
   resize: vertical;
   background-color: white;
   color: #111827;
-  min-height: 120px;
+  /* Reduced height from 120px to 80px */
+  min-height: 10px;
   box-sizing: border-box;
 }
 
@@ -158,10 +159,16 @@
     font-size: 0.8125rem;
   }
 
-  .form-textarea {
+  /* .form-textarea {
     padding: 0.625rem 0.75rem;
     font-size: 0.8125rem;
     min-height: 100px;
+  } */
+
+  .form-textarea {
+    min-height: 60px;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.8125rem;
   }
 
   .form-grid {

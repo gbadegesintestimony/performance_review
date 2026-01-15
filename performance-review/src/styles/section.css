@@ -1,4 +1,9 @@
-/* Section Styles - No background, part of main container */
+.form-container-wrapper {
+  background-color: #f9fafb; /* The "Ash" color (Gray 50) */
+  padding: 2rem;
+  min-height: 100vh;
+}
+
 .section {
   background-color: transparent;
   border-radius: 0;
@@ -8,6 +13,14 @@
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
+}
+
+.section-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  background: transparent; /* Ensures the header area feels integrated */
 }
 
 .section:last-of-type {

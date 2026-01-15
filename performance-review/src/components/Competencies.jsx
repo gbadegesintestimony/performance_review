@@ -1,7 +1,6 @@
 import React from "react";
 import { Award } from "lucide-react";
 import CompetencyRating from "./competencyRating";
-import Achievements from "./Achievements";
 import "../styles/section.css";
 
 const competenciesData = {
@@ -40,26 +39,22 @@ export default function Competencies({ selectedRole }) {
       : "Manager";
 
   return (
-    <>
-      <section className="section">
-        <h2 className="section-title section-title-bold">
-          <Award className="section-icon" />
-          Competencies ({roleTitle})
-        </h2>
-        {competencies.length === 0 ? (
-          <p className="section-subtitle">
-            Select a role to see relevant competencies
-          </p>
-        ) : (
-          <>
-            {competencies.map((competency, index) => (
-              <CompetencyRating key={index} competency={competency} />
-            ))}
-          </>
-        )}
-      </section>
-
-      <Achievements />
-    </>
+    <section className="section">
+      <h2 className="section-title section-title-bold">
+        <Award className="section-icon" />
+        Competencies ({roleTitle})
+      </h2>
+      {competencies.length === 0 ? (
+        <p className="section-subtitle">
+          Select a role to see relevant competencies
+        </p>
+      ) : (
+        <div className="competency-list">
+          {competencies.map((competency, index) => (
+            <CompetencyRating key={index} competency={competency} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

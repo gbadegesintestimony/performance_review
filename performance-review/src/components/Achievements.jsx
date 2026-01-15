@@ -12,35 +12,31 @@ export default function Achievements() {
 
   return (
     <section className="section">
-      <div className="section-header">
-        <h2
-          className="section-title section-title-bold"
-          style={{ marginBottom: 0 }}
-        >
+      <div className="section-header-flex">
+        <h2 className="section-title section-title-bold">
           <TrendingUp className="section-icon" />
           Key Achievements
         </h2>
-        <div className="add-button-container">
-          <button className="add-button" onClick={addAchievement}>
-            + Add Achievement
-          </button>
-        </div>
+        <button className="add-button" onClick={addAchievement}>
+          + Add Achievement
+        </button>
       </div>
-      {achievements.map((achievement) => (
+
+      {achievements.map((achievement, index) => (
         <div key={achievement.id} className="item-container">
+          <h4 className="form-label-small">Achievement {index + 1}</h4>
+
           <div className="form-group">
-            <label className="form-label-small">
-              Achievement {achievement.id}
-            </label>
-            <label className="form-label-small">Description</label>
+            <label className="form-label">Description</label>
             <textarea
               placeholder="What did you accomplish?"
               rows="2"
               className="form-textarea"
             />
           </div>
+
           <div className="form-group">
-            <label className="form-label-small">Business Impact</label>
+            <label className="form-label">Business Impact</label>
             <textarea
               placeholder="How did this impact the team/company?"
               rows="2"

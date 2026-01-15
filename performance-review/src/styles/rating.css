@@ -82,10 +82,10 @@
     font-size: 0.625rem;
   }
 }
-  text-align: center;
+/* text-align: center;
   line-height: 1.2;
   max-width: 4rem;
-}
+} */
 
 @media (max-width: 640px) {
   .rating-star {
