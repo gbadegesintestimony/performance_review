@@ -1,0 +1,304 @@
+/* Header Styles - STICKY - WHITE BACKGROUND */
+.header {
+  background-color: white;
+  color: #111827;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-container {
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: #14b8a6;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-star-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #14b8a6;
+}
+
+.header-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+  color: #111827;
+}
+
+.header-subtitle {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.bell-icon-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  transition: color 0.2s;
+}
+
+.bell-icon-button:hover {
+  background-color: #abeec5;
+  border-radius: 0.3rem;
+  color: hsl(157, 94%, 13%);
+}
+
+.bell-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Navigation Tabs - STICKY - NO GAP with header */
+.nav-tabs-wrapper {
+  background-color: white;
+  overflow-x: auto;
+  position: sticky;
+  top: 3.5rem;
+  z-index: 90;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.nav-tabs-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0.5rem 0.5rem;
+  display: flex;
+  gap: 0.001rem;
+  background-color: rgb(241, 238, 238);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  justify-content: center;
+}
+
+/* Hide scrollbar for nav tabs but keep functionality */
+.nav-tabs-wrapper::-webkit-scrollbar {
+  height: 0;
+}
+
+.nav-tabs-wrapper {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.nav-tab:hover {
+  color: hsl(0, 0%, 4%);
+  /* background-color: #f9fafb; */
+}
+
+.nav-tab-active {
+  color: hsl(0, 0%, 4%);
+  background-color: white;
+  /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+  border: 1px solid #e5e7eb;
+}
+
+.tab-icon {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+
+/* Main Content */
+.page-wrapper {
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.main-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  padding-bottom: 2rem;
+}
+
+/* Content Container - White centered box with all sections - NARROWER */
+.content-container {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  padding: 2rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Role Selection Container - Houses IC, Senior IC, Manager */
+.role-selection-container {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.role-selection-title {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #6b7280;
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Role Selection Tabs - Inside the container */
+.role-tabs-section {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.role-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.5rem;
+  background-color: #f9fafb;
+  border: 1px solid #f0f0f5;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 400;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.role-tab:hover {
+  color: #0f0f0f;
+  background-color: white;
+}
+
+.role-tab-active {
+  background-color: white;
+  color: #111827;
+  border-color: #f7fafa;
+  box-shadow: 0 2px 4px rgba(20, 184, 166, 0.15);
+  font-weight: 400;
+}
+
+.role-icon {
+  width: 1rem;
+  height: 0.8rem;
+}
+
+/* Section Containers - Each section gets its own container */
+.section-container {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-container:last-of-type {
+  margin-bottom: 2rem;
+}
+
+/* Submit Button - NOT FIXED, inside container */
+.submit-button {
+  width: 100%;
+  background-color: #14b8a6;
+  color: white;
+  padding: 0.875rem;
+  border-radius: 0.5rem;
+  font-weight: 400;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9375rem;
+  margin-top: 2rem;
+}
+
+.submit-button:hover {
+  background-color: #0d9488;
+}
+
+.submit-message {
+  font-size: 0.75rem;
+  text-align: center;
+  color: #6b7280;
+  margin-top: 0.75rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 768px) {
+  .content-container {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  .nav-tabs-wrapper {
+    padding: 0.75rem;
+  }
+
+  .nav-tabs-container {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .role-tabs-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  /* Adjust sticky position for mobile */
+  .nav-tabs-wrapper {
+    top: 3.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .content-container {
+    padding: 1rem;
+  }
+
+  .header-container {
+    padding: 0 0.75rem;
+  }
+}
