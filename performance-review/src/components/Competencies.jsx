@@ -1,6 +1,6 @@
 import React from "react";
 import { Award } from "lucide-react";
-import CompetencyRating from "./CompetencyRating";
+import CompetencyRating from "./competencyRating";
 import Achievements from "./Achievements";
 import "../styles/section.css";
 
