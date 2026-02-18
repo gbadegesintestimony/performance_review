@@ -1,0 +1,23 @@
+.app {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.tab-placeholder {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.tab-placeholder h2 {
+  font-size: 32px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.tab-placeholder p {
+  font-size: 16px;
+  color: #6b7280;
+}
