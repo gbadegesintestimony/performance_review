@@ -1,18 +1,14 @@
-import Review from "../models/Review.js";
+import { createReviewServices } from "../services/reviewServices.js";
 
 export const createReview = async (req, res) => {
   const { submissionId, rating, feedback } = req.body;
 
-  const review = await Review.create({
-    submission: submissionId,
-    manager: req.user._id,
+  const review = await createReviewServices(
+    submissionId,
+    req.user._id,
     rating,
     feedback,
-  });
-
-  await Submission.findByIdAndUpdate(submissionId, {
-    status: "reviewed",
-  });
+  );
 
   res.status(201).json(review);
 };
