@@ -1,12 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { Star } from "lucide-react";
 import "../styles/section.css";
 import "../styles/form.css";
 import "../styles/rating.css";
 
-export default function CompetencyRating({ competency }) {
-  const [rating, setRating] = useState(0);
-
+export default function CompetencyRating({ competency, rating = 0, onRatingChange }) {
   return (
     <div className="competency-item">
       <div className="competency-header">
@@ -15,7 +13,8 @@ export default function CompetencyRating({ competency }) {
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
-              onClick={() => setRating(star)}
+              type="button"
+              onClick={() => onRatingChange?.(star)}
               className="competency-star-button"
               aria-label={`Rate ${star} stars`}
             >
@@ -28,11 +27,6 @@ export default function CompetencyRating({ competency }) {
           ))}
         </div>
       </div>
-      <textarea
-        placeholder="Provide specific examples or feedback..."
-        rows="2"
-        className="form-textarea"
-      />
     </div>
   );
 }

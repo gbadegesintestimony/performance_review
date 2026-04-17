@@ -1,0 +1,321 @@
+// Frontend/src/components/SubmissionDetailModal.jsx - VIEW/REVIEW MODAL
+import React, { useState } from "react";
+import "../styles/SubmissionDetailModal.css";
+
+const SubmissionDetailModal = ({
+  submission,
+  isManager,
+  onClose,
+  onApprove,
+  onReject,
+}) => {
+  const [feedback, setFeedback] = useState("");
+  const [rating, setRating] = useState(3);
+
+  const handleApprove = () => {
+    if (isManager && feedback.trim()) {
+      onApprove({ feedback, rating });
+    } else if (isManager) {
+      alert("Please provide feedback before approving");
+    }
+  };
+
+  const handleReject = () => {
+    if (isManager && feedback.trim()) {
+      onReject({ feedback });
+    } else if (isManager) {
+      alert("Please provide feedback before rejecting");
+    }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="modal-header">
+          <div>
+            <h2>
+              {submission.title ||
+                `${submission.reviewPeriod} Performance Review`}
+            </h2>
+            <p className="modal-subtitle">
+              Submitted by {submission.employee?.name || submission.submittedBy}{" "}
+              • {submission.timeAgo}
+            </p>
+          </div>
+          <button className="close-btn" onClick={onClose}>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="modal-body">
+          {/* Employee Info */}
+          <section className="detail-section">
+            <h3>Employee Information</h3>
+            <div className="info-grid">
+              <div className="info-item">
+                <label>Name:</label>
+                <span>
+                  {submission.employeeInfo?.name ||
+                    submission.employee?.name ||
+                    "N/A"}
+                </span>
+              </div>
+              <div className="info-item">
+                <label>Role:</label>
+                <span>
+                  {submission.employeeInfo?.role ||
+                    submission.employee?.role ||
+                    "N/A"}
+                </span>
+              </div>
+              <div className="info-item">
+                <label>Department:</label>
+                <span>
+                  {submission.employeeInfo?.department ||
+                    submission.department ||
+                    "N/A"}
+                </span>
+              </div>
+              <div className="info-item">
+                <label>Review Period:</label>
+                <span>{submission.reviewPeriod}</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Goals */}
+          {submission.goals && submission.goals.length > 0 && (
+            <section className="detail-section">
+              <h3>Goals</h3>
+              <ul className="goals-list">
+                {submission.goals.map((goal, index) => (
+                  <li key={index}>
+                    {typeof goal === "string" ? (
+                      goal
+                    ) : (
+                      <div>
+                        {goal.description && <p>{goal.description}</p>}
+                        <p>Progress: {goal.progress}%</p>
+                        {goal.comments && <p>Comments: {goal.comments}</p>}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Competencies */}
+          {submission.competencies &&
+            Object.keys(submission.competencies).length > 0 && (
+              <section className="detail-section">
+                <h3>Competencies</h3>
+                <div className="competencies-grid">
+                  {Object.entries(submission.competencies).map(
+                    ([key, value]) => (
+                      <div key={key} className="competency-item">
+                        <label>{key.replace(/([A-Z])/g, " $1").trim()}:</label>
+                        <div className="rating-display">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <span
+                              key={star}
+                              className={`star ${star <= value ? "filled" : ""}`}
+                            >
+                              ★
+                            </span>
+                          ))}
+                          <span className="rating-value">({value}/5)</span>
+                        </div>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </section>
+            )}
+
+          {/* Growth Areas */}
+          {submission.growthAreas &&
+            Object.keys(submission.growthAreas).length > 0 && (
+              <section className="detail-section">
+                <h3>Growth Areas</h3>
+                {Object.entries(submission.growthAreas).map(([key, values]) =>
+                  Array.isArray(values) && values.length > 0 ? (
+                    <div className="growth-subsection" key={key}>
+                      <h4>
+                        {key === "areas"
+                          ? "Areas for Growth"
+                          : key.replace(/([A-Z])/g, " $1").trim()}
+                      </h4>
+                      <ul>
+                        {values.map((value, index) => (
+                          <li key={index}>{value}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null,
+                )}
+              </section>
+            )}
+
+          {/* Self Evaluation */}
+          {submission.selfEvaluation && (
+            <section className="detail-section">
+              <h3>Self Evaluation</h3>
+
+              {submission.selfEvaluation.accomplishments && (
+                <div className="eval-item">
+                  <h4>Accomplishments</h4>
+                  <p>{submission.selfEvaluation.accomplishments}</p>
+                </div>
+              )}
+
+              {submission.selfEvaluation.challenges && (
+                <div className="eval-item">
+                  <h4>Challenges</h4>
+                  <p>{submission.selfEvaluation.challenges}</p>
+                </div>
+              )}
+
+              {submission.selfEvaluation.learnings && (
+                <div className="eval-item">
+                  <h4>Learnings</h4>
+                  <p>{submission.selfEvaluation.learnings}</p>
+                </div>
+              )}
+
+              {submission.selfEvaluation.futureGoals && (
+                <div className="eval-item">
+                  <h4>Future Goals</h4>
+                  <p>{submission.selfEvaluation.futureGoals}</p>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Overall Rating */}
+          {submission.overallRating && (
+            <section className="detail-section">
+              <h3>Overall Rating</h3>
+              <div className="overall-rating">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span
+                    key={star}
+                    className={`star-large ${star <= submission.overallRating ? "filled" : ""}`}
+                  >
+                    ★
+                  </span>
+                ))}
+                <span className="rating-text">
+                  {submission.overallRating}/5
+                </span>
+              </div>
+            </section>
+          )}
+
+          {/* Manager Review Section (Only for managers on pending submissions) */}
+          {isManager && submission.status === "pending" && (
+            <section className="detail-section manager-review-section">
+              <h3>Manager Review</h3>
+
+              <div className="form-group">
+                <label>Rating:</label>
+                <div className="rating-input">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      className={`star-btn ${star <= rating ? "active" : ""}`}
+                      onClick={() => setRating(star)}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Feedback:</label>
+                <textarea
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Provide feedback on this submission..."
+                  rows={6}
+                />
+              </div>
+            </section>
+          )}
+
+          {/* Previous Manager Feedback (for reviewed submissions) */}
+          {submission.managerFeedback && (
+            <section className="detail-section">
+              <h3>Manager Feedback</h3>
+              <div className="feedback-display">
+                <div className="feedback-rating">
+                  <label>Rating:</label>
+                  <div className="rating-display">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span
+                        key={star}
+                        className={`star ${star <= submission.managerFeedback.rating ? "filled" : ""}`}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="feedback-comments">
+                  <label>Comments:</label>
+                  <p>{submission.managerFeedback.comments}</p>
+                </div>
+                <div className="feedback-meta">
+                  <span>
+                    Reviewed by:{" "}
+                    {submission.managerFeedb ||
+                      submission.managerFeedback.feedbackack.reviewedBy?.name}
+                  </span>
+                  <span>
+                    On:{" "}
+                    {new Date(
+                      submission.managerFeedback.reviewedAt,
+                    ).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            </section>
+          )}
+        </div>
+
+        {/* Footer Actions */}
+        <div className="modal-footer">
+          <button className="btn-secondary" onClick={onClose}>
+            Close
+          </button>
+
+          {isManager && submission.status === "pending" && (
+            <>
+              <button className="btn-danger" onClick={handleReject}>
+                Reject
+              </button>
+              <button className="btn-primary" onClick={handleApprove}>
+                Approve
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SubmissionDetailModal;

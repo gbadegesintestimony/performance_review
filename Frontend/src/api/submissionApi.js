@@ -1,26 +1,90 @@
-const BASE_URL = "http://localhost:5000/api/submissions";
+import { API_ENDPOINTS } from "../config/api";
 
 const getToken = () => localStorage.getItem("token");
 
 export const createSubmission = async (data) => {
-  const res = await fetch(BASE_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken()}`,
-    },
-    body: JSON.stringify(data),
-  });
+  try {
+    const res = await fetch(API_ENDPOINTS.submissions, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(data),
+    });
 
-  return res.json();
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "Failed to create submission");
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Create submission error:", error);
+    throw error;
+  }
 };
 
 export const getPendingSubmissions = async () => {
-  const res = await fetch(`${BASE_URL}/pending`, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`,
-    },
-  });
+  try {
+    const res = await fetch(`${API_ENDPOINTS.submissions}/pending`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
 
-  return res.json();
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "Failed to fetch submissions");
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Get pending submissions error:", error);
+    throw error;
+  }
+};
+
+export const getMySubmissions = async () => {
+  try {
+    const res = await fetch(`${API_ENDPOINTS.submissions}/my-submissions`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "Failed to fetch my submissions");
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Get my submissions error:", error);
+    throw error;
+  }
+};
+
+export const reviewSubmission = async (submissionId) => {
+  try {
+    const res = await fetch(
+      `${API_ENDPOINTS.submissions}/${submissionId}/review`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "Failed to review submission");
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Review submission error:", error);
+    throw error;
+  }
 };

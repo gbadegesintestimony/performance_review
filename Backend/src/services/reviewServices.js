@@ -3,9 +3,9 @@ import Submission from "../models/submission.js";
 
 export const createReviewServices = async (
   submissionId,
+  managerId,
   rating,
   feedback,
-  managerId
 ) => {
   const review = await Review.create({
     submission: submissionId,
@@ -14,7 +14,7 @@ export const createReviewServices = async (
     feedback,
   });
 
-  await submission.findByIdAndUpdate(submissionId, {
+  await Submission.findByIdAndUpdate(submissionId, {
     status: "reviewed",
   });
 

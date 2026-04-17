@@ -3,7 +3,7 @@ import { Briefcase, ChevronDown } from "lucide-react";
 import "../styles/section.css";
 import "../styles/form.css";
 
-export default function EmployeeInfo() {
+export default function EmployeeInfo({ user, onReviewPeriodChange }) {
   const [isDeptOpen, setIsDeptOpen] = useState(false);
   const [selectedDept, setSelectedDept] = useState("");
   const [isPeriodOpen, setIsPeriodOpen] = useState(false);
@@ -74,6 +74,7 @@ export default function EmployeeInfo() {
                     className="custom-select-option"
                     onClick={() => {
                       setSelectedPeriod(p);
+                      onReviewPeriodChange?.(p);
                       setIsPeriodOpen(false);
                     }}
                   >

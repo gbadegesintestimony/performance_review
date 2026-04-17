@@ -1,11 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { Star } from "lucide-react";
 import "../styles/section.css";
 import "../styles/rating.css";
 
-export default function Rating() {
-  const [rating, setRating] = useState(0);
-
+export default function Rating({ rating = 0, onRatingChange }) {
   const ratingLabels = [
     "Needs Improvement",
     "Developing",
@@ -24,7 +22,8 @@ export default function Rating() {
         {[1, 2, 3, 4, 5].map((star) => (
           <div key={star} className="rating-item">
             <button
-              onClick={() => setRating(star)}
+              type="button"
+              onClick={() => onRatingChange?.(star)}
               className="rating-button"
               aria-label={`Rate ${ratingLabels[star - 1]}`}
             >

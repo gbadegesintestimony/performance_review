@@ -4,7 +4,13 @@ import CompetencyRating from "./competencyRating";
 import "../styles/section.css";
 
 const competenciesData = {
-  ic: [],
+  ic: [
+    "Technical Excellence",
+    "Problem Solving",
+    "Communication",
+    "Teamwork",
+    "Time Management",
+  ],
   "senior-ic": [
     "Technical Excellence",
     "Mentorship",
@@ -12,10 +18,6 @@ const competenciesData = {
     "Cross-team Collaboration",
     "Innovation",
     "Technical Leadership",
-    "Documentation & Knowledge Sharing",
-    "Decision Making",
-    "Change Management",
-    "Resource Allocation",
   ],
   manager: [
     "Team Leadership",
@@ -25,12 +27,11 @@ const competenciesData = {
     "Stakeholder Management",
     "Decision Making",
     "Change Management",
-    "Resource Allocation",
   ],
 };
 
-export default function Competencies({ selectedRole }) {
-  const competencies = competenciesData[selectedRole] || [];
+export default function Competencies({ selectedRole, competencies = {}, onCompetenciesChange }) {
+  const competencyLabels = competenciesData[selectedRole] || [];
   const roleTitle =
     selectedRole === "ic"
       ? "Individual Contributor"
@@ -38,20 +39,29 @@ export default function Competencies({ selectedRole }) {
       ? "Senior Individual Contributor"
       : "Manager";
 
+  const updateRating = (competency, rating) => {
+    onCompetenciesChange({ ...competencies, [competency]: rating });
+  };
+
   return (
     <section className="section">
       <h2 className="section-title section-title-bold">
         <Award className="section-icon" />
         Competencies ({roleTitle})
       </h2>
-      {competencies.length === 0 ? (
+      {competencyLabels.length === 0 ? (
         <p className="section-subtitle">
           Select a role to see relevant competencies
         </p>
       ) : (
         <div className="competency-list">
-          {competencies.map((competency, index) => (
-            <CompetencyRating key={index} competency={competency} />
+          {competencyLabels.map((competency, index) => (
+            <CompetencyRating
+              key={index}
+              competency={competency}
+              rating={competencies[competency] || 0}
+              onRatingChange={(value) => updateRating(competency, value)}
+            />
           ))}
         </div>
       )}

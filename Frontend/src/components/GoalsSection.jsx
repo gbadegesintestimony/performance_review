@@ -1,48 +1,51 @@
-import React, { useState } from "react";
+import React from "react";
 import { Target } from "lucide-react";
 import "../styles/section.css";
 import "../styles/form.css";
 
-export default function GoalsSection() {
-  const [goals, setGoals] = useState([{ id: 1, progress: 0 }]);
-
+export default function GoalsSection({ goals = [], onGoalsChange }) {
   const addGoal = () => {
-    setGoals([...goals, { id: goals.length + 1, progress: 0 }]);
+    onGoalsChange([
+      ...goals,
+      { description: "", progress: 0, comments: "" },
+    ]);
   };
 
-  const updateProgress = (id, value) => {
-    setGoals(
-      goals.map((goal) =>
-        goal.id === id ? { ...goal, progress: value } : goal
-      )
+  const updateGoal = (index, field, value) => {
+    const updatedGoals = goals.map((goal, idx) =>
+      idx === index ? { ...goal, [field]: value } : goal,
     );
+    onGoalsChange(updatedGoals);
+  };
+
+  const removeGoal = (index) => {
+    onGoalsChange(goals.filter((_, idx) => idx !== index));
   };
 
   return (
     <section className="section">
       <div className="section-header">
-        <h2
-          className="section-title section-title-bold"
-          style={{ marginBottom: 0 }}
-        >
+        <h2 className="section-title section-title-bold" style={{ marginBottom: 0 }}>
           <Target className="section-icon" />
           Goals & Objectives
         </h2>
         <div className="add-button-container">
-          <button className="add-button" onClick={addGoal}>
+          <button className="add-button" type="button" onClick={addGoal}>
             + Add Goal
           </button>
         </div>
       </div>
       {goals.map((goal, index) => (
-        <div key={goal.id} className="item-container">
+        <div key={index} className="item-container">
           <div className="form-group">
-            <label className="form-label">Goal {goal.id}</label>
+            <label className="form-label">Goal {index + 1}</label>
             <label className="form-label-small">Description</label>
             <textarea
               placeholder="Describe the goal..."
               rows="2"
               className="form-textarea"
+              value={goal.description}
+              onChange={(e) => updateGoal(index, "description", e.target.value)}
             />
           </div>
           <div className="form-group">
@@ -52,7 +55,7 @@ export default function GoalsSection() {
               min="0"
               max="100"
               value={goal.progress}
-              onChange={(e) => updateProgress(goal.id, e.target.value)}
+              onChange={(e) => updateGoal(index, "progress", Number(e.target.value))}
               className="progress-slider"
               style={{ "--value": `${goal.progress}%` }}
             />
@@ -63,8 +66,19 @@ export default function GoalsSection() {
               placeholder="Additional comments..."
               rows="2"
               className="form-textarea"
+              value={goal.comments}
+              onChange={(e) => updateGoal(index, "comments", e.target.value)}
             />
           </div>
+          {goals.length > 1 && (
+            <button
+              type="button"
+              className="remove-button"
+              onClick={() => removeGoal(index)}
+            >
+              Remove Goal
+            </button>
+          )}
         </div>
       ))}
     </section>

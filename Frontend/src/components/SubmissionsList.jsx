@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import SubmissionCard from "./SubmissionCard";
 import "../styles/SubmissionsList.css";
 
-const SubmissionsList = ({ submissions }) => {
+const SubmissionsList = ({ user, submissions = [], onReview }) => {
+  console.log("Debug Role:", user?.role);
   const [activeFilter, setActiveFilter] = useState("pending");
 
   const filteredSubmissions = submissions.filter(
-    (submission) => submission.status.toLowerCase() === activeFilter,
+    (submission) => submission.status.trim().toLowerCase() === activeFilter,
   );
 
   const pendingCount = submissions.filter(
@@ -62,7 +63,11 @@ const SubmissionsList = ({ submissions }) => {
           </div>
         ) : (
           filteredSubmissions.map((submission) => (
-            <SubmissionCard key={submission.id} submission={submission} />
+            <SubmissionCard
+              key={submission.id}
+              submission={submission}
+              onReview={onReview}
+            />
           ))
         )}
       </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "../styles/Header.css";
 
 const TAB_ICONS = {
@@ -47,111 +47,6 @@ const TAB_ICONS = {
       />
     </svg>
   ),
-  timesheet: (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 6V12L16 14"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
-  tasks: (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <rect
-        x="3"
-        y="4"
-        width="18"
-        height="18"
-        rx="2"
-        ry="2"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <line
-        x1="16"
-        y1="2"
-        x2="16"
-        y2="6"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <line
-        x1="8"
-        y1="2"
-        x2="8"
-        y2="6"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <line
-        x1="3"
-        y1="10"
-        x2="21"
-        y2="10"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
-  expense: (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <line
-        x1="12"
-        y1="1"
-        x2="12"
-        y2="23"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
   review: (
     <svg
       width="24"
@@ -169,39 +64,19 @@ const TAB_ICONS = {
       />
     </svg>
   ),
-  builder: (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <polyline
-        points="23 6 13.5 15.5 8.5 10.5 1 18"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <polyline
-        points="17 6 23 6 23 12"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
 };
 
 const Header = ({
+  user,
+  onLogout,
   activeTab,
   title,
   subtitle,
   notificationCount,
   onNotificationClick,
 }) => {
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
   return (
     <header className="header">
       <div className="header-left">
@@ -241,6 +116,65 @@ const Header = ({
             <span className="notification-badge">{notificationCount}</span>
           )}
         </button>
+
+        {/* User Menu */}
+        <div className="user-menu-container">
+          <button
+            className="user-menu-button"
+            onClick={() => setShowUserMenu(!showUserMenu)}
+          >
+            <div className="user-avatar">
+              {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+            </div>
+            <span className="user-name">{user?.name || "User"}</span>
+            <svg
+              className={`dropdown-arrow ${showUserMenu ? "rotated" : ""}`}
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+            >
+              <path
+                d="M3 4.5L6 7.5L9 4.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+
+          {showUserMenu && (
+            <div className="user-dropdown">
+              <div className="user-info">
+                <div className="user-avatar-large">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+                </div>
+                <div className="user-details">
+                  <div className="user-name-large">{user?.name || "User"}</div>
+                  <div className="user-email">{user?.email || ""}</div>
+                  <div className="user-role">{user?.role || "Employee"}</div>
+                </div>
+              </div>
+              <div className="dropdown-divider"></div>
+              <button className="dropdown-item" onClick={onLogout}>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16,17 21,12 16,7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Sign Out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

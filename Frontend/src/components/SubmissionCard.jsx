@@ -1,7 +1,7 @@
 import React from "react";
 import "../styles/SubmissionCard.css";
 
-const SubmissionCard = ({ submission }) => {
+const SubmissionCard = ({ submission, onReview }) => {
   return (
     <div className="submission-card">
       <div className="submission-header">
@@ -56,6 +56,14 @@ const SubmissionCard = ({ submission }) => {
       </div>
       <div className="submission-actions">
         <button className="action-button primary">View Details</button>
+        {onReview && submission.status === "pending" && (
+          <button
+            className="action-button review"
+            onClick={() => onReview(submission.id)}
+          >
+            Review
+          </button>
+        )}
         <button className="action-button secondary">
           <svg
             width="16"

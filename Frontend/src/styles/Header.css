@@ -38,6 +38,9 @@
 
 .header-right {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .notification-button {
@@ -74,4 +77,140 @@
   font-size: 12px;
   font-weight: 600;
   border: 2px solid white;
+}
+
+/* User Menu Styles */
+.user-menu-container {
+  position: relative;
+}
+
+.user-menu-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.user-menu-button:hover {
+  border-color: #14b8a6;
+  background-color: #f0fdfa;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.dropdown-arrow {
+  transition: transform 0.2s;
+}
+
+.dropdown-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  min-width: 240px;
+  z-index: 1000;
+}
+
+.user-info {
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.user-avatar-large {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-name-large {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.user-email {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.user-role {
+  font-size: 12px;
+  color: #14b8a6;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: #e5e7eb;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: #374151;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: #f9fafb;
+}
+
+.dropdown-item svg {
+  width: 16px;
+  height: 16px;
+  color: #6b7280;
 }

@@ -1,23 +1,27 @@
-import React, { useState } from "react";
+// Frontend/src/App.jsx - COLLECTS ALL FORM DATA
+import React, { useState, useEffect } from "react";
 import {
-  User,
-  Calendar,
-  Clock,
-  MessageSquare,
-  TrendingUp,
-  FileText,
-  Star,
-} from "lucide-react";
+  getPendingSubmissions,
+  getMySubmissions,
+  createSubmission,
+  reviewSubmission,
+} from "./api/submissionApi";
+
+import AuthView from "./components/AuthView";
+import Header from "./components/Header";
+import TabNavigation from "./components/TabNavigation";
+import NotificationPanel from "./components/NotificationPanel";
+import SubmissionsList from "./components/SubmissionsList";
+import SubmissionDetailModal from "./components/SubmissionDetailModal";
+
+// Import review components
 import EmployeeInfo from "./components/EmployeeInfo";
 import GoalsSection from "./components/GoalsSection";
 import Competencies from "./components/Competencies";
 import GrowthAreas from "./components/GrowthAreas";
 import SelfEvaluation from "./components/SelfEvaluation";
 import Rating from "./components/Rating";
-import SubmissionsList from "./components/SubmissionsList";
-import Header from "./components/Header";
-import TabNavigation from "./components/TabNavigation";
-import NotificationPanel from "./components/NotificationPanel";
+
 import "./App.css";
 import "./styles/layout.css";
 
@@ -27,26 +31,15 @@ const TAB_CONFIG = {
     heading: "Submissions",
     subtitle: "Review and approve",
   },
-  timesheet: {
-    label: "Timesheet",
-    heading: "Timesheet",
-    subtitle: "Track your hours",
-  },
-  tasks: { label: "Tasks", heading: "Tasks", subtitle: "Manage your work" },
-  expense: {
-    label: "Expense",
-    heading: "Expense",
-    subtitle: "Track your spending",
+  mySubmissions: {
+    label: "My History",
+    heading: "My Submissions",
+    subtitle: "View your past reviews",
   },
   review: {
     label: "Review",
     heading: "Performance Review",
     subtitle: "Evaluate performance",
-  },
-  builder: {
-    label: "Builder",
-    heading: "Builder",
-    subtitle: "Build your profile",
   },
 };
 
@@ -54,127 +47,343 @@ export default function App() {
   const [selectedRole, setSelectedRole] = useState("ic");
   const [activeTab, setActiveTab] = useState("submissions");
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState([]);
   const [submissions, setSubmissions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  // ✅ COMPLETE Review form state - ALL FIELDS
+  const [reviewData, setReviewData] = useState({
+    reviewPeriod: "Q1 2024",
+    department: "",
+    employeeInfo: {
+      name: "",
+      role: "",
+      department: "",
+      reviewPeriod: "Q1 2024",
+    },
+    goals: [],
+    competencies: {
+      technicalSkills: 3,
+      problemSolving: 3,
+      communication: 3,
+      teamwork: 3,
+      leadership: 3,
+      timeManagement: 3,
+    },
+    growthAreas: {
+      strengths: [],
+      areasForImprovement: [],
+      developmentGoals: [],
+    },
+    selfEvaluation: {
+      accomplishments: "",
+      challenges: "",
+      learnings: "",
+      futureGoals: "",
+    },
+    overallRating: 3,
+  });
+
+  const isManager = currentUser?.role === "Manager";
   const currentTab = TAB_CONFIG[activeTab];
+  const pendingCount = submissions.filter((s) => s.status === "pending").length;
+
+  const notifications = React.useMemo(() => {
+    const notifs = [];
+    if (isManager && pendingCount > 0) {
+      notifs.push({
+        id: "pending-reviews",
+        title: "Pending Reviews",
+        message: `You have ${pendingCount} pending performance review${pendingCount > 1 ? "s" : ""} to review.`,
+        timeAgo: "now",
+        read: false,
+      });
+    }
+    return notifs;
+  }, [submissions, isManager, pendingCount]);
+
+  // Initial auth check
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
+
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+      } catch (err) {
+        console.error("Auth sync error:", err);
+        handleLogout();
+      }
+    }
+    setAuthLoading(false);
+  }, []);
+
+  // Set default tab and initialize form with user data
+  useEffect(() => {
+    if (currentUser?._id && isAuthenticated) {
+      setActiveTab("submissions");
+      setReviewData((prev) => ({
+        ...prev,
+        department: currentUser.department || "Engineering",
+        employeeInfo: {
+          name:
+            currentUser.name ||
+            `${currentUser.firstName} ${currentUser.lastName}`,
+          role: currentUser.role,
+          department: currentUser.department || "Engineering",
+          reviewPeriod: "Q1 2024",
+        },
+      }));
+    }
+  }, [currentUser?._id]);
+
+  // Fetch submissions
+  useEffect(() => {
+    if (!isAuthenticated || authLoading) return;
+    if (activeTab !== "submissions") return;
+
+    const fetchSubmissions = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        let data;
+        if (isManager) {
+          const response = await getPendingSubmissions();
+          data = response.success ? response.data : response;
+        } else {
+          const response = await getMySubmissions();
+          data = response.success ? response.data : response;
+        }
+
+        setSubmissions(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err.message);
+        if (err.message.includes("401")) handleLogout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubmissions();
+  }, [activeTab, isAuthenticated]);
 
   const handleMarkAllRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+    // In real app, this would update backend
   };
 
-  const handleSubmit = () => {
-    alert("Performance Review Submitted Successfully!");
+  // ✅ UPDATED: Submit with ALL form data
+  const handleSubmit = async () => {
+    try {
+      console.log("Submitting complete review:", reviewData);
+
+      const response = await createSubmission(reviewData);
+
+      if (response.success) {
+        alert("Performance Review Submitted Successfully!");
+        setActiveTab("submissions");
+        // Reset form
+        setReviewData({
+          reviewPeriod: "Q1 2024",
+          department: currentUser?.department || "Engineering",
+          employeeInfo: {
+            name:
+              currentUser.name ||
+              `${currentUser.firstName} ${currentUser.lastName}`,
+            role: currentUser.role,
+            department: currentUser.department || "Engineering",
+            reviewPeriod: "Q1 2024",
+          },
+          goals: [],
+          competencies: {
+            technicalSkills: 3,
+            problemSolving: 3,
+            communication: 3,
+            teamwork: 3,
+            leadership: 3,
+            timeManagement: 3,
+          },
+          growthAreas: {
+            strengths: [],
+            areasForImprovement: [],
+            developmentGoals: [],
+          },
+          selfEvaluation: {
+            accomplishments: "",
+            challenges: "",
+            learnings: "",
+            futureGoals: "",
+          },
+          overallRating: 3,
+        });
+      } else {
+        alert("Failed to submit: " + response.message);
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      alert("Failed to submit review: " + error.message);
+    }
   };
+
+  const handleLogin = (userData) => {
+    setCurrentUser(userData);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setCurrentUser(null);
+    setIsAuthenticated(false);
+    setSubmissions([]);
+  };
+
+  // ✅ NEW: Handle View Details
+  const handleViewDetails = (submission) => {
+    console.log("Viewing submission:", submission);
+    setSelectedSubmission(submission);
+    setShowDetailModal(true);
+  };
+
+  // ✅ NEW: Handle Review (for managers)
+  const handleReview = (submission) => {
+    console.log("Reviewing submission:", submission);
+    setSelectedSubmission(submission);
+    setShowDetailModal(true);
+  };
+
+  if (authLoading) {
+    return <div className="loading-screen">Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <AuthView onLogin={handleLogin} />;
+  }
 
   return (
     <div className="page-wrapper">
       <Header
+        user={currentUser}
+        onLogout={handleLogout}
         activeTab={activeTab}
-        title={currentTab.heading}
-        subtitle={currentTab.subtitle}
-        notificationCount={unreadCount}
+        title={currentTab?.heading || "Dashboard"}
+        subtitle={currentTab?.subtitle || ""}
+        notificationCount={pendingCount}
         onNotificationClick={() => setShowNotifications(!showNotifications)}
       />
 
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
       <main className="main-content">
-        {activeTab === "submissions" && (
-          <div className="content-container">
-            <SubmissionsList submissions={submissions} />
-          </div>
-        )}
+        <div className="content-container">
+          {/* Submissions List View */}
+          {activeTab === "submissions" && (
+            <>
+              {loading ? (
+                <div className="loader">Loading submissions...</div>
+              ) : error ? (
+                <div className="error-msg">Error: {error}</div>
+              ) : submissions.length === 0 ? (
+                <div className="empty-state">
+                  <h3>No submissions found</h3>
+                  <p>Check back later or start a new review.</p>
+                </div>
+              ) : (
+                <SubmissionsList
+                  submissions={submissions}
+                  onViewDetails={handleViewDetails}
+                  onReview={isManager ? handleReview : null}
+                />
+              )}
+            </>
+          )}
 
-        {activeTab === "review" && (
-          <div className="content-container">
-            <div className="role-selection-container">
-              <div className="role-tabs-section">
-                <button
-                  className={`role-tab ${selectedRole === "ic" ? "role-tab-active" : ""}`}
-                  onClick={() => setSelectedRole("ic")}
-                >
-                  <User className="role-icon" />
-                  <span>IC</span>
-                </button>
-                <button
-                  className={`role-tab ${selectedRole === "senior-ic" ? "role-tab-active" : ""}`}
-                  onClick={() => setSelectedRole("senior-ic")}
-                >
-                  <svg
-                    className="role-icon"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+          {/* Performance Review Form View */}
+          {activeTab === "review" && (
+            <div className="review-form-wrapper">
+              <div className="role-selection-container">
+                <div className="role-tabs-section">
+                  <button
+                    className={`role-tab ${selectedRole === "ic" ? "role-tab-active" : ""}`}
+                    onClick={() => setSelectedRole("ic")}
                   >
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                  </svg>
-                  <span>Senior IC</span>
-                </button>
-                <button
-                  className={`role-tab ${selectedRole === "manager" ? "role-tab-active" : ""}`}
-                  onClick={() => setSelectedRole("manager")}
-                >
-                  <svg
-                    className="role-icon"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                    IC
+                  </button>
+                  <button
+                    className={`role-tab ${selectedRole === "senior-ic" ? "role-tab-active" : ""}`}
+                    onClick={() => setSelectedRole("senior-ic")}
                   >
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                  </svg>
-                  <span>Manager</span>
-                </button>
+                    Senior IC
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div className="section-container">
-              <EmployeeInfo />
-            </div>
-            <div className="section-container">
-              <GoalsSection />
-            </div>
-            <div className="section-container">
-              <Competencies selectedRole={selectedRole} />
-            </div>
-            <div className="section-container">
-              <GrowthAreas />
-            </div>
-            <div className="section-container">
-              <SelfEvaluation />
-            </div>
-            <div className="section-container">
-              <Rating />
-            </div>
+              <div className="section-container">
+                <EmployeeInfo user={currentUser} />
+              </div>
 
-            <button className="submit-button" onClick={handleSubmit}>
-              Submit Performance Review
-            </button>
-            <p className="submit-message">
-              Reviews are tailored to your role with relevant competencies
-            </p>
-          </div>
-        )}
+              <div className="section-container">
+                <GoalsSection
+                  goals={reviewData.goals}
+                  onGoalsChange={(goals) =>
+                    setReviewData((prev) => ({ ...prev, goals }))
+                  }
+                />
+              </div>
 
-        {activeTab !== "submissions" && activeTab !== "review" && (
-          <div className="tab-placeholder">
-            <h2>{currentTab.heading}</h2>
-            <p>This section is under development</p>
-          </div>
-        )}
+              <div className="section-container">
+                <Competencies
+                  selectedRole={selectedRole}
+                  competencies={reviewData.competencies}
+                  onCompetenciesChange={(competencies) =>
+                    setReviewData((prev) => ({ ...prev, competencies }))
+                  }
+                />
+              </div>
+
+              <div className="section-container">
+                <GrowthAreas
+                  growthAreas={reviewData.growthAreas}
+                  onGrowthAreasChange={(growthAreas) =>
+                    setReviewData((prev) => ({ ...prev, growthAreas }))
+                  }
+                />
+              </div>
+
+              <div className="section-container">
+                <SelfEvaluation
+                  selfEvaluation={reviewData.selfEvaluation}
+                  onSelfEvaluationChange={(selfEvaluation) =>
+                    setReviewData((prev) => ({ ...prev, selfEvaluation }))
+                  }
+                />
+              </div>
+
+              <div className="section-container">
+                <Rating
+                  rating={reviewData.overallRating}
+                  onRatingChange={(overallRating) =>
+                    setReviewData((prev) => ({ ...prev, overallRating }))
+                  }
+                />
+              </div>
+
+              <button className="submit-button" onClick={handleSubmit}>
+                Submit Performance Review
+              </button>
+              <p className="submit-message">
+                Reviews are tailored to your role with relevant competencies
+              </p>
+            </div>
+          )}
+        </div>
       </main>
 
       {showNotifications && (
@@ -182,6 +391,26 @@ export default function App() {
           notifications={notifications}
           onClose={() => setShowNotifications(false)}
           onMarkAllRead={handleMarkAllRead}
+        />
+      )}
+
+      {showDetailModal && selectedSubmission && (
+        <SubmissionDetailModal
+          submission={selectedSubmission}
+          isManager={isManager}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedSubmission(null);
+          }}
+          onApprove={async () => {
+            // Approve submission logic
+            setShowDetailModal(false);
+            // Refresh submissions
+          }}
+          onReject={async () => {
+            // Reject submission logic
+            setShowDetailModal(false);
+          }}
         />
       )}
     </div>
