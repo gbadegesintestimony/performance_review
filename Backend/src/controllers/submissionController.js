@@ -78,6 +78,7 @@ export const getMySubmissions = async (req, res) => {
 export const reviewSubmission = async (req, res) => {
   try {
     const { submissionId } = req.params;
+    const { rating, feedback } = req.body;
 
     console.log(
       "Reviewing submission:",
@@ -89,6 +90,7 @@ export const reviewSubmission = async (req, res) => {
     const submission = await reviewSubmissionService(
       submissionId,
       req.user._id,
+      { rating, feedback },
     );
 
     res.json({

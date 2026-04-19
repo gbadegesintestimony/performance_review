@@ -48,10 +48,10 @@
   font-size: 14px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 760px) {
   .tab-button {
     flex: none;
-    min-width: 63px;
+    min-width: 60px;
   }
 
   .tab-label {

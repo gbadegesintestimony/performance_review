@@ -95,6 +95,7 @@
   cursor: pointer;
   transition: all 0.2s;
   border: none;
+  background-color: #14b8a6;
 }
 
 .action-button.primary {
@@ -119,6 +120,10 @@
   background-color: #f9fafb;
 }
 
+.action-button:hover {
+  color: white;
+}
+
 @media (max-width: 640px) {
   .submission-header {
     flex-direction: column;
@@ -130,7 +135,12 @@
   }
 
   .action-button {
-    width: 100%;
+    width: 50%;
     justify-content: center;
+    color: white;
+  }
+  .status-pending {
+    background-color: #fef3c7;
+    color: #92400e;
   }
 }

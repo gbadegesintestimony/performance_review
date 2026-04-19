@@ -1,10 +1,11 @@
-// Frontend/src/App.jsx - COLLECTS ALL FORM DATA
+// Frontend/src/App.jsx - FINAL WORKING VERSION
 import React, { useState, useEffect } from "react";
+import { User, UserCheck, Users } from "lucide-react";
+
 import {
   getPendingSubmissions,
   getMySubmissions,
   createSubmission,
-  reviewSubmission,
 } from "./api/submissionApi";
 
 import AuthView from "./components/AuthView";
@@ -25,21 +26,51 @@ import Rating from "./components/Rating";
 import "./App.css";
 import "./styles/layout.css";
 
+const PlaceholderView = ({ title }) => (
+  <div
+    className="empty-state"
+    style={{
+      minHeight: "400px",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+    }}
+  >
+    <h2 style={{ fontSize: "2rem", fontWeight: "bold", color: "#0f172a" }}>
+      {title}
+    </h2>
+    <p style={{ fontSize: "1.1rem", color: "#64748b", marginTop: "10px" }}>
+      This section is under development
+    </p>
+  </div>
+);
+
 const TAB_CONFIG = {
   submissions: {
     label: "Submissions",
     heading: "Submissions",
     subtitle: "Review and approve",
   },
-  mySubmissions: {
-    label: "My History",
-    heading: "My Submissions",
-    subtitle: "View your past reviews",
-  },
   review: {
     label: "Review",
     heading: "Performance Review",
     subtitle: "Evaluate performance",
+  },
+  timesheet: {
+    label: "Timesheet",
+    heading: "Timesheet",
+    subtitle: "Track your hours",
+  },
+  builder: {
+    label: "Builder",
+    heading: "Builder",
+    subtitle: "Build your profile",
+  },
+  tasks: { label: "Tasks", heading: "Tasks", subtitle: "Manage your work" },
+  expense: {
+    label: "Expense",
+    heading: "Expense",
+    subtitle: "Track your spending",
   },
 };
 
@@ -56,25 +87,17 @@ export default function App() {
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
-  // ✅ COMPLETE Review form state - ALL FIELDS
   const [reviewData, setReviewData] = useState({
-    reviewPeriod: "Q1 2024",
+    reviewPeriod: "",
     department: "",
     employeeInfo: {
       name: "",
       role: "",
       department: "",
-      reviewPeriod: "Q1 2024",
+      reviewPeriod: "",
     },
     goals: [],
-    competencies: {
-      technicalSkills: 3,
-      problemSolving: 3,
-      communication: 3,
-      teamwork: 3,
-      leadership: 3,
-      timeManagement: 3,
-    },
+    competencies: {},
     growthAreas: {
       strengths: [],
       areasForImprovement: [],
@@ -86,12 +109,17 @@ export default function App() {
       learnings: "",
       futureGoals: "",
     },
-    overallRating: 3,
+    overallRating: "",
   });
 
   const isManager = currentUser?.role === "Manager";
   const currentTab = TAB_CONFIG[activeTab];
+
   const pendingCount = submissions.filter((s) => s.status === "pending").length;
+  const unreadReviewedCount = submissions.filter(
+    (s) => s.status === "reviewed" && !s.viewedByEmployee,
+  ).length;
+  const notificationCount = isManager ? pendingCount : unreadReviewedCount;
 
   const notifications = React.useMemo(() => {
     const notifs = [];
@@ -103,11 +131,22 @@ export default function App() {
         timeAgo: "now",
         read: false,
       });
+    } else if (!isManager && unreadReviewedCount > 0) {
+      submissions
+        .filter((s) => s.status === "reviewed" && !s.viewedByEmployee)
+        .forEach((sub) => {
+          notifs.push({
+            id: `reviewed-${sub._id}`,
+            title: "Review Completed",
+            message: `Your ${sub.reviewPeriod} review has been completed by your manager.`,
+            timeAgo: "recently",
+            read: false,
+          });
+        });
     }
     return notifs;
-  }, [submissions, isManager, pendingCount]);
+  }, [submissions, isManager, pendingCount, unreadReviewedCount]);
 
-  // Initial auth check
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userStr = localStorage.getItem("user");
@@ -125,7 +164,6 @@ export default function App() {
     setAuthLoading(false);
   }, []);
 
-  // Set default tab and initialize form with user data
   useEffect(() => {
     if (currentUser?._id && isAuthenticated) {
       setActiveTab("submissions");
@@ -138,13 +176,12 @@ export default function App() {
             `${currentUser.firstName} ${currentUser.lastName}`,
           role: currentUser.role,
           department: currentUser.department || "Engineering",
-          reviewPeriod: "Q1 2024",
+          reviewPeriod: "",
         },
       }));
     }
   }, [currentUser?._id]);
 
-  // Fetch submissions
   useEffect(() => {
     if (!isAuthenticated || authLoading) return;
     if (activeTab !== "submissions") return;
@@ -163,6 +200,7 @@ export default function App() {
           data = response.success ? response.data : response;
         }
 
+        console.log("Fetched submissions:", data);
         setSubmissions(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err.message);
@@ -176,40 +214,58 @@ export default function App() {
   }, [activeTab, isAuthenticated]);
 
   const handleMarkAllRead = () => {
-    // In real app, this would update backend
+    setSubmissions((prev) =>
+      prev.map((s) => ({ ...s, viewedByEmployee: true })),
+    );
   };
 
-  // ✅ UPDATED: Submit with ALL form data
   const handleSubmit = async () => {
     try {
-      console.log("Submitting complete review:", reviewData);
+      console.log("Submitting review:", reviewData);
 
-      const response = await createSubmission(reviewData);
+      const transformedData = {
+        reviewPeriod: reviewData.reviewPeriod,
+        department: reviewData.department,
+        employeeInfo: reviewData.employeeInfo,
+        goals: reviewData.goals
+          .map((goal) => {
+            if (typeof goal === "string") return goal;
+            return goal.description || "";
+          })
+          .filter((g) => g.trim() !== ""),
+        competencies: reviewData.competencies,
+        growthAreas: reviewData.growthAreas,
+        selfEvaluation: reviewData.selfEvaluation,
+        overallRating: reviewData.overallRating,
+      };
+
+      console.log("Transformed data:", transformedData);
+
+      const response = await createSubmission(transformedData);
 
       if (response.success) {
         alert("Performance Review Submitted Successfully!");
+
+        const updatedSubmissions = await getMySubmissions();
+        setSubmissions(
+          Array.isArray(updatedSubmissions.data) ? updatedSubmissions.data : [],
+        );
+
         setActiveTab("submissions");
-        // Reset form
+
         setReviewData({
-          reviewPeriod: "Q1 2024",
-          department: currentUser?.department || "Engineering",
+          reviewPeriod: {},
+          department: currentUser?.department,
           employeeInfo: {
             name:
               currentUser.name ||
               `${currentUser.firstName} ${currentUser.lastName}`,
             role: currentUser.role,
-            department: currentUser.department || "Engineering",
-            reviewPeriod: "Q1 2024",
+            department: currentUser.department,
+            reviewPeriod: {},
           },
           goals: [],
-          competencies: {
-            technicalSkills: 3,
-            problemSolving: 3,
-            communication: 3,
-            teamwork: 3,
-            leadership: 3,
-            timeManagement: 3,
-          },
+          competencies: {},
           growthAreas: {
             strengths: [],
             areasForImprovement: [],
@@ -221,7 +277,7 @@ export default function App() {
             learnings: "",
             futureGoals: "",
           },
-          overallRating: 3,
+          overallRating: 0,
         });
       } else {
         alert("Failed to submit: " + response.message);
@@ -233,8 +289,14 @@ export default function App() {
   };
 
   const handleLogin = (userData) => {
-    setCurrentUser(userData);
+    const formattedUser = {
+      ...userData,
+      name: userData.name || `${userData.firstName} ${userData.lastName}`,
+    };
+
+    setCurrentUser(formattedUser);
     setIsAuthenticated(true);
+    localStorage.setItem("user", JSON.stringify(formattedUser));
   };
 
   const handleLogout = () => {
@@ -245,18 +307,77 @@ export default function App() {
     setSubmissions([]);
   };
 
-  // ✅ NEW: Handle View Details
   const handleViewDetails = (submission) => {
     console.log("Viewing submission:", submission);
     setSelectedSubmission(submission);
     setShowDetailModal(true);
+
+    if (!isManager && submission.status === "reviewed") {
+      setSubmissions((prev) =>
+        prev.map((s) =>
+          s._id === submission._id ? { ...s, viewedByEmployee: true } : s,
+        ),
+      );
+    }
   };
 
-  // ✅ NEW: Handle Review (for managers)
   const handleReview = (submission) => {
-    console.log("Reviewing submission:", submission);
+    console.log("Opening review modal for submission:", submission);
+    console.log("Submission _id:", submission._id);
     setSelectedSubmission(submission);
     setShowDetailModal(true);
+  };
+
+  // ✅ FIXED: Proper review submission handler
+  const handleApproveReview = async (feedbackData) => {
+    try {
+      // ✅ Check if submission exists and has _id
+      if (!selectedSubmission || !selectedSubmission._id) {
+        console.error(
+          "No submission selected or missing _id:",
+          selectedSubmission,
+        );
+        alert("Error: No submission ID found. Please try again.");
+        return;
+      }
+
+      const submissionId = selectedSubmission._id;
+      console.log("Submitting review for submission:", submissionId);
+      console.log("Feedback data:", feedbackData);
+
+      const response = await fetch(
+        `http://localhost:5000/api/submissions/${submissionId}/review`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(feedbackData),
+        },
+      );
+
+      const result = await response.json();
+      console.log("Review response:", result);
+
+      if (result.success) {
+        alert("Review submitted successfully!");
+
+        // Refresh submissions
+        const updatedSubmissions = await getPendingSubmissions();
+        setSubmissions(
+          Array.isArray(updatedSubmissions.data) ? updatedSubmissions.data : [],
+        );
+
+        setShowDetailModal(false);
+        setSelectedSubmission(null);
+      } else {
+        alert("Failed to submit review: " + result.message);
+      }
+    } catch (error) {
+      console.error("Review submission error:", error);
+      alert("Error submitting review: " + error.message);
+    }
   };
 
   if (authLoading) {
@@ -275,7 +396,7 @@ export default function App() {
         activeTab={activeTab}
         title={currentTab?.heading || "Dashboard"}
         subtitle={currentTab?.subtitle || ""}
-        notificationCount={pendingCount}
+        notificationCount={notificationCount}
         onNotificationClick={() => setShowNotifications(!showNotifications)}
       />
 
@@ -283,7 +404,6 @@ export default function App() {
 
       <main className="main-content">
         <div className="content-container">
-          {/* Submissions List View */}
           {activeTab === "submissions" && (
             <>
               {loading ? (
@@ -298,6 +418,7 @@ export default function App() {
               ) : (
                 <SubmissionsList
                   submissions={submissions}
+                  isManager={isManager}
                   onViewDetails={handleViewDetails}
                   onReview={isManager ? handleReview : null}
                 />
@@ -305,7 +426,6 @@ export default function App() {
             </>
           )}
 
-          {/* Performance Review Form View */}
           {activeTab === "review" && (
             <div className="review-form-wrapper">
               <div className="role-selection-container">
@@ -314,13 +434,22 @@ export default function App() {
                     className={`role-tab ${selectedRole === "ic" ? "role-tab-active" : ""}`}
                     onClick={() => setSelectedRole("ic")}
                   >
-                    IC
+                    <User className="role-icon" size={18} />
+                    <span>IC</span>
                   </button>
                   <button
                     className={`role-tab ${selectedRole === "senior-ic" ? "role-tab-active" : ""}`}
                     onClick={() => setSelectedRole("senior-ic")}
                   >
-                    Senior IC
+                    <UserCheck className="role-icon" size={18} />
+                    <span>Senior IC</span>
+                  </button>
+                  <button
+                    className={`role-tab ${selectedRole === "manager" ? "role-tab-active" : ""}`}
+                    onClick={() => setSelectedRole("manager")}
+                  >
+                    <Users className="role-icon" size={18} />
+                    <span>Manager</span>
                   </button>
                 </div>
               </div>
@@ -383,6 +512,10 @@ export default function App() {
               </p>
             </div>
           )}
+
+          {["timesheet", "builder", "tasks", "expense"].includes(activeTab) && (
+            <PlaceholderView title={TAB_CONFIG[activeTab].label} />
+          )}
         </div>
       </main>
 
@@ -398,19 +531,12 @@ export default function App() {
         <SubmissionDetailModal
           submission={selectedSubmission}
           isManager={isManager}
+          currentUser={currentUser}
           onClose={() => {
             setShowDetailModal(false);
             setSelectedSubmission(null);
           }}
-          onApprove={async () => {
-            // Approve submission logic
-            setShowDetailModal(false);
-            // Refresh submissions
-          }}
-          onReject={async () => {
-            // Reject submission logic
-            setShowDetailModal(false);
-          }}
+          onApprove={handleApproveReview}
         />
       )}
     </div>

@@ -65,15 +65,17 @@ export const getMySubmissions = async () => {
   }
 };
 
-export const reviewSubmission = async (submissionId) => {
+export const reviewSubmission = async (submissionId, reviewData) => {
   try {
     const res = await fetch(
       `${API_ENDPOINTS.submissions}/${submissionId}/review`,
       {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${getToken()}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
+        body: JSON.stringify(reviewData),
       },
     );
 

@@ -1,37 +1,36 @@
-// Frontend/src/components/SubmissionDetailModal.jsx - VIEW/REVIEW MODAL
+// Frontend/src/components/SubmissionDetailModal.jsx - SHOWS ALL IC DATA
 import React, { useState } from "react";
 import "../styles/SubmissionDetailModal.css";
 
 const SubmissionDetailModal = ({
   submission,
   isManager,
+  currentUser,
   onClose,
   onApprove,
-  onReject,
 }) => {
   const [feedback, setFeedback] = useState("");
   const [rating, setRating] = useState(3);
 
   const handleApprove = () => {
-    if (isManager && feedback.trim()) {
-      onApprove({ feedback, rating });
-    } else if (isManager) {
-      alert("Please provide feedback before approving");
-    }
-  };
+    if (isManager) {
+      if (!feedback.trim()) {
+        alert("Please provide feedback before approving");
+        return;
+      }
 
-  const handleReject = () => {
-    if (isManager && feedback.trim()) {
-      onReject({ feedback });
-    } else if (isManager) {
-      alert("Please provide feedback before rejecting");
+      onApprove({
+        rating,
+        feedback,
+        reviewedBy: currentUser._id,
+        reviewerName: currentUser.name,
+      });
     }
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
         <div className="modal-header">
           <div>
             <h2>
@@ -39,8 +38,11 @@ const SubmissionDetailModal = ({
                 `${submission.reviewPeriod} Performance Review`}
             </h2>
             <p className="modal-subtitle">
-              Submitted by {submission.employee?.name || submission.submittedBy}{" "}
-              • {submission.timeAgo}
+              Submitted by{" "}
+              {submission.employee?.name ||
+                submission.employeeInfo?.name ||
+                submission.submittedBy}{" "}
+              • {submission.timeAgo || "recently"}
             </p>
           </div>
           <button className="close-btn" onClick={onClose}>
@@ -57,7 +59,6 @@ const SubmissionDetailModal = ({
           </button>
         </div>
 
-        {/* Content */}
         <div className="modal-body">
           {/* Employee Info */}
           <section className="detail-section">
@@ -100,17 +101,7 @@ const SubmissionDetailModal = ({
               <h3>Goals</h3>
               <ul className="goals-list">
                 {submission.goals.map((goal, index) => (
-                  <li key={index}>
-                    {typeof goal === "string" ? (
-                      goal
-                    ) : (
-                      <div>
-                        {goal.description && <p>{goal.description}</p>}
-                        <p>Progress: {goal.progress}%</p>
-                        {goal.comments && <p>Comments: {goal.comments}</p>}
-                      </div>
-                    )}
-                  </li>
+                  <li key={index}>{goal}</li>
                 ))}
               </ul>
             </section>
@@ -123,22 +114,41 @@ const SubmissionDetailModal = ({
                 <h3>Competencies</h3>
                 <div className="competencies-grid">
                   {Object.entries(submission.competencies).map(
-                    ([key, value]) => (
-                      <div key={key} className="competency-item">
-                        <label>{key.replace(/([A-Z])/g, " $1").trim()}:</label>
-                        <div className="rating-display">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <span
-                              key={star}
-                              className={`star ${star <= value ? "filled" : ""}`}
-                            >
-                              ★
+                    ([key, value]) => {
+                      const ratingValue =
+                        typeof value === "object" ? value.rating : value;
+                      const feedbackText =
+                        typeof value === "object" ? value.feedback : "";
+
+                      // Skip if rating is 0 or undefined
+                      if (!ratingValue) return null;
+
+                      return (
+                        <div key={key} className="competency-item">
+                          <label>
+                            {key.replace(/([A-Z])/g, " $1").trim()}:
+                          </label>
+                          <div className="rating-display">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <span
+                                key={star}
+                                className={`star ${star <= ratingValue ? "filled" : ""}`}
+                              >
+                                ★
+                              </span>
+                            ))}
+                            <span className="rating-value">
+                              ({ratingValue}/5)
                             </span>
-                          ))}
-                          <span className="rating-value">({value}/5)</span>
+                          </div>
+                          {feedbackText && (
+                            <p className="competency-feedback-display">
+                              {feedbackText}
+                            </p>
+                          )}
                         </div>
-                      </div>
-                    ),
+                      );
+                    },
                   )}
                 </div>
               </section>
@@ -155,7 +165,13 @@ const SubmissionDetailModal = ({
                       <h4>
                         {key === "areas"
                           ? "Areas for Growth"
-                          : key.replace(/([A-Z])/g, " $1").trim()}
+                          : key === "strengths"
+                            ? "Strengths"
+                            : key === "areasForImprovement"
+                              ? "Areas for Improvement"
+                              : key === "developmentGoals"
+                                ? "Development Goals"
+                                : key.replace(/([A-Z])/g, " $1").trim()}
                       </h4>
                       <ul>
                         {values.map((value, index) => (
@@ -276,41 +292,40 @@ const SubmissionDetailModal = ({
                 </div>
                 <div className="feedback-comments">
                   <label>Comments:</label>
-                  <p>{submission.managerFeedback.comments}</p>
+                  <p>
+                    {submission.managerFeedback.feedback ||
+                      submission.managerFeedback.comments ||
+                      "No feedback provided"}
+                  </p>
                 </div>
                 <div className="feedback-meta">
                   <span>
                     Reviewed by:{" "}
-                    {submission.managerFeedb ||
-                      submission.managerFeedback.feedbackack.reviewedBy?.name}
+                    {submission.managerFeedback.reviewerName || "Manager"}
                   </span>
-                  <span>
-                    On:{" "}
-                    {new Date(
-                      submission.managerFeedback.reviewedAt,
-                    ).toLocaleDateString()}
-                  </span>
+                  {submission.managerFeedback.reviewedAt && (
+                    <span>
+                      On:{" "}
+                      {new Date(
+                        submission.managerFeedback.reviewedAt,
+                      ).toLocaleDateString()}
+                    </span>
+                  )}
                 </div>
               </div>
             </section>
           )}
         </div>
 
-        {/* Footer Actions */}
         <div className="modal-footer">
           <button className="btn-secondary" onClick={onClose}>
             Close
           </button>
 
           {isManager && submission.status === "pending" && (
-            <>
-              <button className="btn-danger" onClick={handleReject}>
-                Reject
-              </button>
-              <button className="btn-primary" onClick={handleApprove}>
-                Approve
-              </button>
-            </>
+            <button className="btn-primary" onClick={handleApprove}>
+              Approve & Submit Review
+            </button>
           )}
         </div>
       </div>

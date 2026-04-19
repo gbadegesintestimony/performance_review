@@ -31,7 +31,6 @@
 
 .section-title {
   font-size: 1rem;
-  font-weight: 400;
   color: #111827;
   margin-bottom: 1.25rem;
   display: flex;
@@ -44,9 +43,16 @@
   font-weight: 700;
 }
 
+.section-title.section-title-bold {
+  font-weight: 700 !important;
+  font-size: 1rem;
+  color: #111827;
+}
+
 .section-icon {
+  display: flex;
   width: 1.25rem;
-  height: 1.25rem;
+  height: 1.5rem;
   color: #14b8a6;
   flex-shrink: 0;
 }
@@ -80,6 +86,7 @@
 }
 
 .add-button {
+  display: flex;
   color: #0c0c0c;
   font-size: 0.875rem;
   font-weight: 400;
@@ -112,15 +119,124 @@
   margin-bottom: 0.5rem;
 }
 
+/* Ensure the item stacks vertically */
+.competency-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+/* Maintain horizontal layout for Title and Stars */
+.competency-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem; /* Space between stars and the box */
+  width: 100%;
+}
+
+/* Match the prototype's box style */
+.competency-item .form-textarea {
+  width: 100%;
+  min-height: 80px;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.875rem;
+  resize: vertical;
+}
+
+/* Item containers */
+.item-container {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.item-container:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.competency-title {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: #111827;
+  margin: 0;
+}
+
+.competency-star-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s;
+}
+
+.competency-star {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #d1d5db;
+  transition: all 0.2s;
+  stroke-width: 2;
+  flex-shrink: 0;
+  display: flex;
+}
+
+.competency-star:hover {
+  color: hsl(157, 94%, 13%);
+  transform: scale(1.1);
+}
+
+.competency-star-active {
+  fill: hsl(157, 94%, 13%);
+  color: hsl(157, 94%, 13%);
+}
+.title-group {
+  display: flex;
+  gap: 5px;
+}
+
+.title-group .section-icon {
+  padding-top: 1px;
+}
+
+.section-title-bold,
+.section-title.section-title-bold {
+  font-weight: 700 !important; /* Only "Self Evaluation", "Employee Info", etc. */
+  font-size: 1rem;
+  color: #111827;
+}
+
+.remove-button {
+  background-color: #0d9488;
+  color: white;
+
+  border-radius: 15px;
+  width: 30%;
+  height: 23px;
+}
+/* Mobile adjustments */
 @media (max-width: 640px) {
+  .competency-header {
+    flex-direction: row; /* Keep stars next to title on mobile like prototype */
+    justify-content: space-between;
+  }
+
   .section {
     margin-bottom: 1rem;
     padding-bottom: 1rem;
   }
 
   .section-title {
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    margin-bottom: 0;
+    white-space: nowrap;
+    flex: 1;
   }
 
   .section-icon {
@@ -129,18 +245,33 @@
   }
 
   .section-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 5px;
+  }
+
+  .section-title.section-title-bold {
+    margin-bottom: 0 !important;
+    white-space: nowrap; /* Prevents text from wrapping to a second line */
+    font-size: 0.9rem !important; /* Slightly smaller for mobile fit */
+    flex-shrink: 1; /* Allows title to shrink slightly if space is tight */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adds ... if the title is way too long */
   }
 
   .add-button-container {
-    width: 100%;
-    padding: 0.875rem;
+    width: auto !important;
+    padding: 0.5rem 0.75rem; /* Slightly smaller padding for mobile */
+    margin: 0;
   }
 
   .add-button {
-    width: 100%;
+    padding: 4px 10px !important; /* Slimmer padding for mobile */
+    font-size: 0.75rem !important;
+    flex-shrink: 0; /* Prevents the button from getting squished */
+    width: auto !important;
   }
 
   .comment-container {
@@ -165,129 +296,29 @@
   }
 
   .competency-title {
+    display: flex;
     width: 100%;
   }
 
   .competency-stars {
     width: 100%;
   }
-}
 
-/* Add Button Container */
-.add-button-container {
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-  display: flex;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.add-button {
-  color: #0c0c0c;
-  font-size: 0.875rem;
-  font-weight: 400;
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: color 0.2s;
-  white-space: nowrap;
-}
-
-.add-button:hover {
-  color: #0d9488;
-}
-
-/* Item containers */
-.item-container {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.item-container:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-/* Competency Rating Styles */
-.competency-item {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.competency-item:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.competency-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  gap: 1rem;
-}
-
-.competency-title {
-  font-size: 0.9375rem;
-  font-weight: 400;
-  color: #111827;
-  margin: 0;
-}
-
-.competency-stars {
-  display: flex;
-  gap: 0.25rem;
-  flex-shrink: 0;
-}
-
-.competency-star-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  transition: transform 0.2s;
-}
-
-.competency-star-button:hover {
-  transform: scale(1.1);
-}
-
-.competency-star {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: #d1d5db;
-  transition: all 0.2s;
-  stroke-width: 2;
-}
-
-.competency-star:hover {
-  color: hsl(157, 94%, 13%);
-}
-
-.competency-star-active {
-  fill: hsl(157, 94%, 13%);
-  color: hsl(157, 94%, 13%);
-}
-
-@media (max-width: 640px) {
-  .section {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.5rem;
+  .growth-area-item {
+    gap: 0.5rem;
   }
 
-  .competency-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .progress-slider {
+    margin: 0.75rem 0; /* Tighten up spacing */
+    height: 6px; /* Slightly thicker for easier touch on mobile */
   }
 
-  .competency-stars {
-    width: 100%;
-    justify-content: space-between;
+  .title-group .section-icon {
+    padding-top: 3px;
+  }
+
+  .remove-button {
+    width: 50%;
+    border: none;
   }
 }

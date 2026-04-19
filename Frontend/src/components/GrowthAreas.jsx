@@ -1,10 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { TrendingUp } from "lucide-react";
 import "../styles/section.css";
 import "../styles/form.css";
 
-export default function GrowthAreas({ growthAreas = { areas: [] }, onGrowthAreasChange }) {
+export default function GrowthAreas({
+  growthAreas = { areas: [] },
+  onGrowthAreasChange,
+}) {
   const areas = growthAreas.areas || [];
+
+  useEffect(() => {
+    if (areas.length === 0) {
+      onGrowthAreasChange({ areas: [""] });
+    }
+  }, [areas, onGrowthAreasChange]);
 
   const addArea = () => {
     onGrowthAreasChange({ areas: [...areas, ""] });
@@ -16,16 +25,18 @@ export default function GrowthAreas({ growthAreas = { areas: [] }, onGrowthAreas
   };
 
   const removeArea = (index) => {
-    onGrowthAreasChange({ areas: areas.filter((_, idx) => idx !== index) });
+    if (areas.length > 1) {
+      onGrowthAreasChange({ areas: areas.filter((_, idx) => idx !== index) });
+    }
   };
 
   return (
     <section className="section">
       <div className="section-header">
-        <h2 className="section-title">
+        <div className="title-group">
           <TrendingUp className="section-icon" />
-          Areas for Growth
-        </h2>
+          <h2 className="section-title section-title-bold">Areas for Growth</h2>
+        </div>
         <button className="add-button" type="button" onClick={addArea}>
           + Add Area
         </button>
@@ -45,7 +56,7 @@ export default function GrowthAreas({ growthAreas = { areas: [] }, onGrowthAreas
               className="remove-button"
               onClick={() => removeArea(index)}
             >
-              Remove
+              Remove Growth
             </button>
           )}
         </div>

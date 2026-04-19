@@ -1,18 +1,30 @@
+// Frontend/src/components/SubmissionsList.jsx - MANAGER NO VIEW DETAILS
 import React, { useState } from "react";
 import SubmissionCard from "./SubmissionCard";
 import "../styles/SubmissionsList.css";
 
-const SubmissionsList = ({ user, submissions = [], onReview }) => {
-  console.log("Debug Role:", user?.role);
+const SubmissionsList = ({
+  submissions = [],
+  isManager,
+  onViewDetails,
+  onReview,
+}) => {
   const [activeFilter, setActiveFilter] = useState("pending");
 
-  const filteredSubmissions = submissions.filter(
-    (submission) => submission.status.trim().toLowerCase() === activeFilter,
-  );
+  const filteredSubmissions = submissions.filter((submission) => {
+    const status = (submission?.status || "").toString().trim().toLowerCase();
+    return status === activeFilter;
+  });
 
-  const pendingCount = submissions.filter(
-    (s) => s.status.toLowerCase() === "pending",
-  ).length;
+  const pendingCount = submissions.filter((s) => {
+    const status = (s?.status || "").toString().trim().toLowerCase();
+    return status === "pending";
+  }).length;
+
+  const reviewedCount = submissions.filter((s) => {
+    const status = (s?.status || "").toString().trim().toLowerCase();
+    return status === "reviewed";
+  }).length;
 
   return (
     <div className="submissions-list">
@@ -31,6 +43,9 @@ const SubmissionsList = ({ user, submissions = [], onReview }) => {
           onClick={() => setActiveFilter("reviewed")}
         >
           Reviewed
+          {reviewedCount > 0 && (
+            <span className="filter-count">{reviewedCount}</span>
+          )}
         </button>
       </div>
 
@@ -64,8 +79,10 @@ const SubmissionsList = ({ user, submissions = [], onReview }) => {
         ) : (
           filteredSubmissions.map((submission) => (
             <SubmissionCard
-              key={submission.id}
+              key={submission._id || submission.id}
               submission={submission}
+              isManager={isManager}
+              onViewDetails={onViewDetails}
               onReview={onReview}
             />
           ))

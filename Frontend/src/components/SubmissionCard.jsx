@@ -1,7 +1,8 @@
+// Frontend/src/components/SubmissionCard.jsx - MANAGER NO VIEW DETAILS
 import React from "react";
 import "../styles/SubmissionCard.css";
 
-const SubmissionCard = ({ submission, onReview }) => {
+const SubmissionCard = ({ submission, isManager, onViewDetails, onReview }) => {
   return (
     <div className="submission-card">
       <div className="submission-header">
@@ -31,40 +32,90 @@ const SubmissionCard = ({ submission, onReview }) => {
             </svg>
           </div>
           <div className="submission-details">
-            <h3 className="submission-title">{submission.title}</h3>
+            <h3 className="submission-title">
+              {submission.title ||
+                `${submission.reviewPeriod} Performance Review`}
+            </h3>
             <p className="submission-meta">
-              By {submission.submittedBy} • {submission.timeAgo}
+              By{" "}
+              {submission.submittedBy ||
+                submission.employee?.name ||
+                submission.employeeInfo?.name ||
+                "Unknown"}{" "}
+              • {submission.timeAgo || "recently"}
             </p>
           </div>
         </div>
         <div className="submission-status">
           <span
-            className={`status-badge status-${submission.status.toLowerCase()}`}
+            className={`status-badge status-${(submission.status || "pending").toLowerCase()}`}
           >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="6" cy="6" r="6" fill="currentColor" />
-            </svg>
-            {submission.status}
+            {submission.status || "pending"}
           </span>
         </div>
       </div>
+
       <div className="submission-actions">
-        <button className="action-button primary">View Details</button>
-        {onReview && submission.status === "pending" && (
+        {/* ✅ IC/Senior IC: Show View Details */}
+        {!isManager && (
           <button
-            className="action-button review"
-            onClick={() => onReview(submission.id)}
+            className="action-button action-view"
+            onClick={() => onViewDetails && onViewDetails(submission)}
           >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="3"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            View Details
+          </button>
+        )}
+
+        {/* ✅ Manager: Show Review button for pending submissions */}
+        {isManager && onReview && submission.status === "pending" && (
+          <button
+            className="action-button"
+            onClick={() => onReview(submission)}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
             Review
           </button>
         )}
-        <button className="action-button secondary">
+
+        <button className="action-button">
           <svg
             width="16"
             height="16"
@@ -72,22 +123,17 @@ const SubmissionCard = ({ submission, onReview }) => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <path
-              d="M12 8V12L15 15"
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            <path
-              d="M3.05 11H5C5.53043 11 6.03914 11.2107 6.41421 11.5858C6.78929 11.9609 7 12.4696 7 13V21M21 11H19C18.4696 11 17.9609 11.2107 17.5858 11.5858C17.2107 11.9609 17 12.4696 17 13V21"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M12 21C16.4183 21 20 17.4183 20 13C20 8.58172 16.4183 5 12 5C7.58172 5 4 8.58172 4 13C4 17.4183 7.58172 21 12 21Z"
+            <polyline
+              points="12 6 12 12 16 14"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"

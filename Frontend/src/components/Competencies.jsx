@@ -18,6 +18,10 @@ const competenciesData = {
     "Cross-team Collaboration",
     "Innovation",
     "Technical Leadership",
+    "Documentation & Knowledge Sharing",
+    "Decision Making",
+    "Change Management",
+    "Resource allocation",
   ],
   manager: [
     "Team Leadership",
@@ -27,21 +31,37 @@ const competenciesData = {
     "Stakeholder Management",
     "Decision Making",
     "Change Management",
+    "Resource Allocation",
   ],
 };
 
-export default function Competencies({ selectedRole, competencies = {}, onCompetenciesChange }) {
+export default function Competencies({
+  selectedRole,
+  setSelectedRole,
+  competencies = {},
+  onCompetenciesChange,
+}) {
   const competencyLabels = competenciesData[selectedRole] || [];
   const roleTitle =
     selectedRole === "ic"
       ? "Individual Contributor"
       : selectedRole === "senior-ic"
-      ? "Senior Individual Contributor"
-      : "Manager";
+        ? "Senior Individual Contributor"
+        : "Manager";
 
   const updateRating = (competency, rating) => {
-    onCompetenciesChange({ ...competencies, [competency]: rating });
+    const current = competencies[competency] || { rating: 0, feedback: "" };
+    onCompetenciesChange({
+      ...competencies,
+      [competency]: { ...current, rating },
+    });
   };
+
+  const tabs = [
+    { id: "ic", label: "IC" },
+    { id: "senior-ic", label: "Senior IC" },
+    { id: "manager", label: "Manager" },
+  ];
 
   return (
     <section className="section">
@@ -59,8 +79,20 @@ export default function Competencies({ selectedRole, competencies = {}, onCompet
             <CompetencyRating
               key={index}
               competency={competency}
-              rating={competencies[competency] || 0}
+              rating={competencies[competency]?.rating || 0}
+              feedback={competencies[competency]?.feedback || ""} // Pass feedback
               onRatingChange={(value) => updateRating(competency, value)}
+              onFeedbackChange={(value) => {
+                // New function to update feedback text
+                const current = competencies[competency] || {
+                  rating: 0,
+                  feedback: "",
+                };
+                onCompetenciesChange({
+                  ...competencies,
+                  [competency]: { ...current, feedback: value },
+                });
+              }}
             />
           ))}
         </div>

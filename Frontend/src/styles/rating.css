@@ -73,24 +73,19 @@
     min-width: 50px;
   }
 
-  .rating-star {
+  /* .rating-star {
     width: 1.625rem;
     height: 1.625rem;
-  }
+  } */
 
   .rating-label {
     font-size: 0.625rem;
   }
-}
-/* text-align: center;
-  line-height: 1.2;
-  max-width: 4rem;
-} */
 
-@media (max-width: 640px) {
   .rating-star {
     width: 1.5rem;
     height: 1.5rem;
+    transition: all 0.2s;
   }
 
   .rating-label {
@@ -101,5 +96,14 @@
   .rating-container {
     gap: 0;
     padding: 0;
+  }
+
+  .rating-star:hover {
+    color: hsl(157, 94%, 13%);
+  }
+
+  .rating-star-active {
+    fill: hsl(157, 94%, 13%);
+    color: hsl(157, 94%, 13%);
   }
 }

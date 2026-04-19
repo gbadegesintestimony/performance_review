@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../styles/Header.css";
 
 const TAB_ICONS = {
@@ -64,6 +64,32 @@ const TAB_ICONS = {
       />
     </svg>
   ),
+
+  timesheet: (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      strokeWidth="2"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  ),
+  builder: (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      strokeWidth="2"
+    >
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+    </svg>
+  ),
 };
 
 const Header = ({
@@ -72,10 +98,42 @@ const Header = ({
   activeTab,
   title,
   subtitle,
-  notificationCount,
+  notificationCount = 0,
   onNotificationClick,
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const dropdownRef = useRef(null);
+
+  const getInitials = (name) => {
+    if (!name) return "U";
+    const names = name.split(" ");
+    if (names.length === 1) return names[0].charAt(0).toUpperCase();
+    return (
+      names[0].charAt(0) + names[names.length - 1].charAt(0)
+    ).toUpperCase();
+  };
+
+  const userInitials = getInitials(user?.name);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // If the click is outside the ref container, close the menu
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   return (
     <header className="header">
@@ -118,14 +176,12 @@ const Header = ({
         </button>
 
         {/* User Menu */}
-        <div className="user-menu-container">
+        <div className="user-menu-container" ref={dropdownRef}>
           <button
             className="user-menu-button"
             onClick={() => setShowUserMenu(!showUserMenu)}
           >
-            <div className="user-avatar">
-              {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
-            </div>
+            <div className="user-avatar">{userInitials}</div>
             <span className="user-name">{user?.name || "User"}</span>
             <svg
               className={`dropdown-arrow ${showUserMenu ? "rotated" : ""}`}
@@ -147,9 +203,7 @@ const Header = ({
           {showUserMenu && (
             <div className="user-dropdown">
               <div className="user-info">
-                <div className="user-avatar-large">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
-                </div>
+                <div className="user-avatar-large">{userInitials}</div>
                 <div className="user-details">
                   <div className="user-name-large">{user?.name || "User"}</div>
                   <div className="user-email">{user?.email || ""}</div>

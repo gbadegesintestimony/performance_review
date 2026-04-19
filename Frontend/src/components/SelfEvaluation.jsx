@@ -3,17 +3,22 @@ import { MessageSquare } from "lucide-react";
 import "../styles/section.css";
 import "../styles/form.css";
 
-export default function SelfEvaluation({ selfEvaluation = {}, onSelfEvaluationChange }) {
+export default function SelfEvaluation({
+  selfEvaluation = {},
+  onSelfEvaluationChange,
+}) {
   const handleChange = (field, value) => {
     onSelfEvaluationChange({ ...selfEvaluation, [field]: value });
   };
 
   return (
     <section className="section">
-      <h2 className="section-title section-title-bold">
-        <MessageSquare className="section-icon" />
-        Self Evaluation
-      </h2>
+      <div className="section-header">
+        <h2 className="section-title section-title-bold">
+          <MessageSquare className="section-icon" />
+          Self Evaluation
+        </h2>
+      </div>
       <div className="form-group">
         <label className="form-label">Accomplishments</label>
         <textarea

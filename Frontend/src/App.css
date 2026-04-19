@@ -21,3 +21,39 @@
   font-size: 16px;
   color: #6b7280;
 }
+
+.role-tabs-section {
+  display: flex;
+  gap: 12px;
+  background-color: #f9fafb; /* Ash background */
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.role-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #4b5563;
+}
+
+/* The "Image 1" Teal Border effect */
+.role-tab-active {
+  border: 2px solid #14b8a6; /* Teal border */
+  color: #111827;
+  font-weight: 600;
+}
+
+.role-icon {
+  color: #6b7280; /* Default gray icon */
+}
+
+.role-tab-active .role-icon {
+  color: #14b8a6; /* Teal icon when active */
+}

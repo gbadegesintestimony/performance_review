@@ -1,11 +1,13 @@
 .header {
   display: flex;
   justify-content: space-between;
-  margin: 0 3% 0 2%;
+  margin: 0 0.4% 0 0.5%;
+  border: none;
   align-items: center;
-  padding: 16px 24px;
+  /* padding: 16px 24px; */
   background-color: white;
   border-bottom: 1px solid #e5e7eb;
+  /* width: 100%; */
 }
 
 .header-left {
@@ -137,8 +139,10 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  min-width: 240px;
+  /* min-width: 240px; */
+  width: 350px;
   z-index: 1000;
+  animation: slideIn 0.2s ease-out;
 }
 
 .user-info {
@@ -207,10 +211,69 @@
 
 .dropdown-item:hover {
   background-color: #f9fafb;
+  color: #0d9488;
 }
 
 .dropdown-item svg {
   width: 16px;
   height: 16px;
   color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 12px 16px;
+    /* margin: 0; */
+  }
+
+  .header-title h1 {
+    font-size: 18px;
+  }
+
+  /* Hide the text 'User Name' in the button, show ONLY the avatar */
+  .user-name,
+  .dropdown-arrow {
+    display: none;
+  }
+
+  .user-menu-button {
+    padding: 4px; /* Tighten the button around the avatar */
+    border-radius: 50%; /* Make it circular like the avatar */
+    border: none; /* Cleaner look on mobile */
+  }
+
+  /* Fix the Dropdown Overflow */
+  .user-dropdown {
+    position: absolute;
+    right: 10%; /* Anchor strictly to the right edge */
+    left: auto;
+    min-width: 200px; /* Slightly narrower for small screens */
+    width: calc(100vw - 32px); /* Fallback to prevent it going off-screen */
+    max-width: 280px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Stack user info better on mobile */
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .user-avatar-large {
+    margin-bottom: 0; /* Align side-by-side with details */
+    width: 40px;
+    height: 40px;
+  }
+
+  .user-details {
+    overflow: hidden; /* Prevent long emails from breaking layout */
+  }
+
+  .user-email {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

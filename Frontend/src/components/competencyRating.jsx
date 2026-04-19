@@ -4,7 +4,13 @@ import "../styles/section.css";
 import "../styles/form.css";
 import "../styles/rating.css";
 
-export default function CompetencyRating({ competency, rating = 0, onRatingChange }) {
+export default function CompetencyRating({
+  competency,
+  rating = 0,
+  feedback,
+  onRatingChange,
+  onFeedbackChange,
+}) {
   return (
     <div className="competency-item">
       <div className="competency-header">
@@ -27,6 +33,14 @@ export default function CompetencyRating({ competency, rating = 0, onRatingChang
           ))}
         </div>
       </div>
+      <textarea
+        placeholder="Provide specific examples or feedback..."
+        rows="3"
+        className="form-textarea"
+        style={{ marginTop: "0.5rem" }}
+        value={feedback}
+        onChange={(e) => onFeedbackChange(e.target.value)}
+      />
     </div>
   );
 }
