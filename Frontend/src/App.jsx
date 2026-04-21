@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { User, UserCheck, Users } from "lucide-react";
 
-// ✅ UPDATED: Added reviewSubmission to the imports
 import {
   getPendingSubmissions,
   getMySubmissions,
