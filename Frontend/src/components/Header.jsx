@@ -207,6 +207,9 @@ const Header = ({
                 <div className="user-details">
                   <div className="user-name-large">{user?.name || "User"}</div>
                   <div className="user-email">{user?.email || ""}</div>
+
+                  <div className="user-department">{user?.department}</div>
+
                   <div className="user-role">{user?.role || "Employee"}</div>
                 </div>
               </div>

@@ -73,6 +73,7 @@ export default function EmployeeInfo({ user, onReviewPeriodChange }) {
                     key={p}
                     className="custom-select-option"
                     onClick={() => {
+                      if ((user, onReviewPeriodChange)) onReviewPeriodChange(p);
                       setSelectedPeriod(p);
                       onReviewPeriodChange?.(p);
                       setIsPeriodOpen(false);

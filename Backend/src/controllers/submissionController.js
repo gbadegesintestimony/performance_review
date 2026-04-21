@@ -90,7 +90,7 @@ export const reviewSubmission = async (req, res) => {
     const submission = await reviewSubmissionService(
       submissionId,
       req.user._id,
-      { rating, feedback },
+      { rating, feedback, status: "reviewed" },
     );
 
     res.json({

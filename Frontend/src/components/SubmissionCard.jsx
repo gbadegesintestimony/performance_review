@@ -32,10 +32,7 @@ const SubmissionCard = ({ submission, isManager, onViewDetails, onReview }) => {
             </svg>
           </div>
           <div className="submission-details">
-            <h3 className="submission-title">
-              {submission.title ||
-                `${submission.reviewPeriod} Performance Review`}
-            </h3>
+            <h3 className="submission-title">{`Performance Review`}</h3>
             <p className="submission-meta">
               By{" "}
               {submission.submittedBy ||

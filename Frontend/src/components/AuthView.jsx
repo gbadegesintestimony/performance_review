@@ -99,7 +99,7 @@ const AuthView = ({ onLogin }) => {
 
         // Check if backend returned success
         if (response.success && response.data) {
-          const { token, _id, firstName, lastName, email, role } =
+          const { token, _id, firstName, lastName, email, role, department } =
             response.data;
 
           // Store token in localStorage
@@ -113,6 +113,7 @@ const AuthView = ({ onLogin }) => {
               name: `${firstName} ${lastName}`,
               email,
               role,
+              department,
             }),
           );
 
@@ -124,6 +125,7 @@ const AuthView = ({ onLogin }) => {
               lastName,
               email,
               role,
+              department,
             });
           }
         } else {
@@ -148,7 +150,9 @@ const AuthView = ({ onLogin }) => {
                 ? "SeniorIC"
                 : formData.role === "manager"
                   ? "Manager"
-                  : formData.role,
+                  : formData.role === "department"
+                    ? "Department"
+                    : formData.department,
         });
 
         if (response.success && response.data) {

@@ -1,4 +1,4 @@
-// Frontend/src/components/SubmissionDetailModal.jsx - SHOWS ALL IC DATA
+// Frontend/src/components/SubmissionDetailModal.jsx
 import React, { useState } from "react";
 import "../styles/SubmissionDetailModal.css";
 
@@ -10,21 +10,52 @@ const SubmissionDetailModal = ({
   onApprove,
 }) => {
   const [feedback, setFeedback] = useState("");
-  const [rating, setRating] = useState(3);
+  const [rating, setRating] = useState(0);
 
-  const handleApprove = () => {
-    if (isManager) {
+  const submitReview = async () => {
+    try {
+      // 1. Correctly extract the ID from the submission prop
+      const submissionId = submission?._id || submission?.id;
+
+      if (!submissionId) {
+        alert("Error: No submission ID found on this record.");
+        return;
+      }
+
       if (!feedback.trim()) {
         alert("Please provide feedback before approving");
         return;
       }
 
-      onApprove({
-        rating,
-        feedback,
-        reviewedBy: currentUser._id,
-        reviewerName: currentUser.name,
-      });
+      if (rating === 0) {
+        alert("Please provide a rating");
+        return;
+      }
+
+      // 2. Prepare the data object
+      const reviewData = {
+        rating: rating,
+        feedback: feedback,
+
+        reviewedBy: currentUser?._id || currentUser?.id,
+        reviewerName: currentUser?.name || "Manager",
+      };
+
+      console.log(
+        "Submitting to App.jsx -> ID:",
+        submissionId,
+        "Data:",
+        reviewData,
+      );
+
+      // 3. THE CRITICAL FIX:
+      // We must pass the ID as the 1st argument so App.jsx's 'idOrObject' captures it.
+      if (onApprove) {
+        await onApprove(submissionId, reviewData);
+      }
+    } catch (error) {
+      console.error("Failed to submit review:", error);
+      alert(`Error submitting review: ${error.message || "Unknown error"}`);
     }
   };
 
@@ -33,14 +64,11 @@ const SubmissionDetailModal = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div>
-            <h2>
-              {submission.title ||
-                `${submission.reviewPeriod} Performance Review`}
-            </h2>
+            <h2>{`Performance Review`}</h2>
             <p className="modal-subtitle">
               Submitted by{" "}
-              {submission.employee?.name ||
-                submission.employeeInfo?.name ||
+              {submission.employeeInfo?.name ||
+                submission.employee?.name ||
                 submission.submittedBy}{" "}
               • {submission.timeAgo || "recently"}
             </p>
@@ -52,6 +80,7 @@ const SubmissionDetailModal = ({
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
+              strokeWidth="2"
             >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -75,26 +104,23 @@ const SubmissionDetailModal = ({
               <div className="info-item">
                 <label>Role:</label>
                 <span>
-                  {submission.employeeInfo?.role ||
-                    submission.employee?.role ||
-                    "N/A"}
+                  {submission.role || submission.employee?.role || "N/A"}
                 </span>
               </div>
               <div className="info-item">
                 <label>Department:</label>
-                <span>
-                  {submission.employeeInfo?.department ||
-                    submission.department ||
-                    "N/A"}
-                </span>
+                <span>{submission.department || "N/A"}</span>
               </div>
               <div className="info-item">
-                <label>Review Period:</label>
-                <span>{submission.reviewPeriod}</span>
+                {/* <label>Review Period:</label> */}
+                <span>
+                  {/* {submission.employeeInfo?.reviewPeriod ||
+                    submission.reviewPeriod ||
+                    "N/A"} */}
+                </span>
               </div>
             </div>
           </section>
-
           {/* Goals */}
           {submission.goals && submission.goals.length > 0 && (
             <section className="detail-section">
@@ -106,7 +132,6 @@ const SubmissionDetailModal = ({
               </ul>
             </section>
           )}
-
           {/* Competencies */}
           {submission.competencies &&
             Object.keys(submission.competencies).length > 0 && (
@@ -119,10 +144,8 @@ const SubmissionDetailModal = ({
                         typeof value === "object" ? value.rating : value;
                       const feedbackText =
                         typeof value === "object" ? value.feedback : "";
-
                       // Skip if rating is 0 or undefined
                       if (!ratingValue) return null;
-
                       return (
                         <div key={key} className="competency-item">
                           <label>
@@ -153,7 +176,6 @@ const SubmissionDetailModal = ({
                 </div>
               </section>
             )}
-
           {/* Growth Areas */}
           {submission.growthAreas &&
             Object.keys(submission.growthAreas).length > 0 && (
@@ -183,12 +205,10 @@ const SubmissionDetailModal = ({
                 )}
               </section>
             )}
-
           {/* Self Evaluation */}
           {submission.selfEvaluation && (
             <section className="detail-section">
               <h3>Self Evaluation</h3>
-
               {submission.selfEvaluation.accomplishments && (
                 <div className="eval-item">
                   <h4>Accomplishments</h4>
@@ -218,7 +238,6 @@ const SubmissionDetailModal = ({
               )}
             </section>
           )}
-
           {/* Overall Rating */}
           {submission.overallRating && (
             <section className="detail-section">
@@ -238,12 +257,10 @@ const SubmissionDetailModal = ({
               </div>
             </section>
           )}
-
-          {/* Manager Review Section (Only for managers on pending submissions) */}
+          {/* Manager Input (Only if pending) */}
           {isManager && submission.status === "pending" && (
             <section className="detail-section manager-review-section">
               <h3>Manager Review</h3>
-
               <div className="form-group">
                 <label>Rating:</label>
                 <div className="rating-input">
@@ -259,7 +276,6 @@ const SubmissionDetailModal = ({
                   ))}
                 </div>
               </div>
-
               <div className="form-group">
                 <label>Feedback:</label>
                 <textarea
@@ -271,50 +287,25 @@ const SubmissionDetailModal = ({
               </div>
             </section>
           )}
-
-          {/* Previous Manager Feedback (for reviewed submissions) */}
-          {submission.managerFeedback && (
-            <section className="detail-section">
-              <h3>Manager Feedback</h3>
-              <div className="feedback-display">
-                <div className="feedback-rating">
-                  <label>Rating:</label>
-                  <div className="rating-display">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <span
-                        key={star}
-                        className={`star ${star <= submission.managerFeedback.rating ? "filled" : ""}`}
-                      >
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="feedback-comments">
-                  <label>Comments:</label>
+          {/* View existing feedback if already reviewed */}
+          {!isManager &&
+            (submission.managerFeedback || submission.feedback) && (
+              <section className="detail-section">
+                <h3>Manager Feedback</h3>
+                <div className="feedback-display">
                   <p>
-                    {submission.managerFeedback.feedback ||
-                      submission.managerFeedback.comments ||
-                      "No feedback provided"}
+                    <strong>Rating:</strong>{" "}
+                    {submission.managerFeedback?.rating || submission.rating}
+                    /5
+                  </p>
+                  <p>
+                    <strong>Comments:</strong>{" "}
+                    {submission.managerFeedback?.feedback ||
+                      submission.feedback}
                   </p>
                 </div>
-                <div className="feedback-meta">
-                  <span>
-                    Reviewed by:{" "}
-                    {submission.managerFeedback.reviewerName || "Manager"}
-                  </span>
-                  {submission.managerFeedback.reviewedAt && (
-                    <span>
-                      On:{" "}
-                      {new Date(
-                        submission.managerFeedback.reviewedAt,
-                      ).toLocaleDateString()}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
+              </section>
+            )}
         </div>
 
         <div className="modal-footer">
@@ -323,7 +314,7 @@ const SubmissionDetailModal = ({
           </button>
 
           {isManager && submission.status === "pending" && (
-            <button className="btn-primary" onClick={handleApprove}>
+            <button className="btn-primary" onClick={submitReview}>
               Approve & Submit Review
             </button>
           )}

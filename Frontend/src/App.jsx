@@ -1,11 +1,13 @@
-// Frontend/src/App.jsx - FINAL WORKING VERSION
+// Frontend/src/App.jsx
 import React, { useState, useEffect } from "react";
 import { User, UserCheck, Users } from "lucide-react";
 
+// ✅ UPDATED: Added reviewSubmission to the imports
 import {
   getPendingSubmissions,
   getMySubmissions,
   createSubmission,
+  reviewSubmission,
 } from "./api/submissionApi";
 
 import AuthView from "./components/AuthView";
@@ -88,7 +90,7 @@ export default function App() {
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   const [reviewData, setReviewData] = useState({
-    reviewPeriod: "",
+    reviewPeriod: "Q1 2024",
     department: "",
     employeeInfo: {
       name: "",
@@ -116,6 +118,9 @@ export default function App() {
   const currentTab = TAB_CONFIG[activeTab];
 
   const pendingCount = submissions.filter((s) => s.status === "pending").length;
+  // const reviewedCount = submissions.filter(
+  //   (s) => s.status === "reviewed",
+  // ).length;
   const unreadReviewedCount = submissions.filter(
     (s) => s.status === "reviewed" && !s.viewedByEmployee,
   ).length;
@@ -138,14 +143,20 @@ export default function App() {
           notifs.push({
             id: `reviewed-${sub._id}`,
             title: "Review Completed",
-            message: `Your ${sub.reviewPeriod} review has been completed by your manager.`,
+            message: `Your ${sub.reviewPeriod || "the period"} review has been completed by your manager.`,
             timeAgo: "recently",
             read: false,
           });
         });
     }
     return notifs;
-  }, [submissions, isManager, pendingCount, unreadReviewedCount]);
+  }, [
+    submissions,
+    isManager,
+    pendingCount,
+    unreadReviewedCount,
+    // reviewedCount,
+  ]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -169,13 +180,13 @@ export default function App() {
       setActiveTab("submissions");
       setReviewData((prev) => ({
         ...prev,
-        department: currentUser.department || "Engineering",
+        department: currentUser.department,
         employeeInfo: {
           name:
             currentUser.name ||
             `${currentUser.firstName} ${currentUser.lastName}`,
           role: currentUser.role,
-          department: currentUser.department || "Engineering",
+          department: currentUser.department,
           reviewPeriod: "",
         },
       }));
@@ -200,7 +211,6 @@ export default function App() {
           data = response.success ? response.data : response;
         }
 
-        console.log("Fetched submissions:", data);
         setSubmissions(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err.message);
@@ -221,82 +231,63 @@ export default function App() {
 
   const handleSubmit = async () => {
     try {
-      console.log("Submitting review:", reviewData);
-
       const transformedData = {
-        reviewPeriod: reviewData.reviewPeriod,
         department: reviewData.department,
-        employeeInfo: reviewData.employeeInfo,
+        // employeeInfo: reviewData.employeeInfo,
+        reviewPeriod: reviewData.reviewPeriod,
+        employeeInfo: {
+          name: currentUser?.name || "Employee",
+          role: currentUser?.role || "SeniorIC",
+          department: reviewData.department,
+          reviewPeriod: reviewData.reviewPeriod,
+        },
         goals: reviewData.goals
-          .map((goal) => {
-            if (typeof goal === "string") return goal;
-            return goal.description || "";
-          })
+          .map((goal) =>
+            typeof goal === "string" ? goal : goal.description || "",
+          )
           .filter((g) => g.trim() !== ""),
         competencies: reviewData.competencies,
         growthAreas: reviewData.growthAreas,
         selfEvaluation: reviewData.selfEvaluation,
         overallRating: reviewData.overallRating,
+        stats: "pending",
       };
-
-      console.log("Transformed data:", transformedData);
 
       const response = await createSubmission(transformedData);
 
       if (response.success) {
         alert("Performance Review Submitted Successfully!");
-
         const updatedSubmissions = await getMySubmissions();
         setSubmissions(
           Array.isArray(updatedSubmissions.data) ? updatedSubmissions.data : [],
         );
-
         setActiveTab("submissions");
-
-        setReviewData({
-          reviewPeriod: {},
-          department: currentUser?.department,
-          employeeInfo: {
-            name:
-              currentUser.name ||
-              `${currentUser.firstName} ${currentUser.lastName}`,
-            role: currentUser.role,
-            department: currentUser.department,
-            reviewPeriod: {},
-          },
-          goals: [],
-          competencies: {},
-          growthAreas: {
-            strengths: [],
-            areasForImprovement: [],
-            developmentGoals: [],
-          },
-          selfEvaluation: {
-            accomplishments: "",
-            challenges: "",
-            learnings: "",
-            futureGoals: "",
-          },
-          overallRating: 0,
-        });
       } else {
         alert("Failed to submit: " + response.message);
       }
     } catch (error) {
-      console.error("Submit error:", error);
       alert("Failed to submit review: " + error.message);
     }
   };
 
-  const handleLogin = (userData) => {
+  const handleLogin = (response) => {
+    // If your API returns { success: true, data: { ...user } }
+    const userData = response.data || response;
+
     const formattedUser = {
       ...userData,
+      // Fallback for name if virtual isn't present
       name: userData.name || `${userData.firstName} ${userData.lastName}`,
+      // Explicitly ensure department is captured
+      department: userData.department,
     };
 
     setCurrentUser(formattedUser);
     setIsAuthenticated(true);
     localStorage.setItem("user", JSON.stringify(formattedUser));
+
+    // Debug check: look at your console to see if department exists here
+    console.log("Logged in user:", formattedUser);
   };
 
   const handleLogout = () => {
@@ -308,85 +299,60 @@ export default function App() {
   };
 
   const handleViewDetails = (submission) => {
-    console.log("Viewing submission:", submission);
     setSelectedSubmission(submission);
     setShowDetailModal(true);
-
-    if (!isManager && submission.status === "reviewed") {
-      setSubmissions((prev) =>
-        prev.map((s) =>
-          s._id === submission._id ? { ...s, viewedByEmployee: true } : s,
-        ),
-      );
-    }
   };
 
   const handleReview = (submission) => {
-    console.log("Opening review modal for submission:", submission);
-    console.log("Submission _id:", submission._id);
     setSelectedSubmission(submission);
     setShowDetailModal(true);
   };
 
-  // ✅ FIXED: Proper review submission handler
-  const handleApproveReview = async (feedbackData) => {
+  // ✅ FIXED: Using the reviewSubmission API helper and taking id as an argument
+  // Replace the old handleApproveReview (around line 202) with this:
+  const handleApproveReview = async (idOrObject, feedbackData) => {
     try {
-      // ✅ Check if submission exists and has _id
-      if (!selectedSubmission || !selectedSubmission._id) {
-        console.error(
-          "No submission selected or missing _id:",
-          selectedSubmission,
-        );
-        alert("Error: No submission ID found. Please try again.");
+      // RESOLVE THE ID: This checks if we were sent the whole object or just the ID string
+      const id =
+        typeof idOrObject === "object"
+          ? idOrObject._id || idOrObject.id
+          : idOrObject;
+
+      if (!id || id === "undefined") {
+        console.error("App.jsx Error: Received invalid ID", {
+          idOrObject,
+          feedbackData,
+        });
+        alert("Error: No submission ID found. Please refresh and try again.");
         return;
       }
 
-      const submissionId = selectedSubmission._id;
-      console.log("Submitting review for submission:", submissionId);
-      console.log("Feedback data:", feedbackData);
-
-      const response = await fetch(
-        `http://localhost:5000/api/submissions/${submissionId}/review`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(feedbackData),
-        },
-      );
-
-      const result = await response.json();
-      console.log("Review response:", result);
+      const result = await reviewSubmission(id, feedbackData);
 
       if (result.success) {
         alert("Review submitted successfully!");
 
-        // Refresh submissions
-        const updatedSubmissions = await getPendingSubmissions();
-        setSubmissions(
-          Array.isArray(updatedSubmissions.data) ? updatedSubmissions.data : [],
-        );
+        // Refresh the list based on role
+        const response = isManager
+          ? await getPendingSubmissions()
+          : await getMySubmissions();
+        const freshData = response.success ? response.data : response;
+        setSubmissions(Array.isArray(freshData) ? freshData : []);
 
+        // Close modal and cleanup
         setShowDetailModal(false);
         setSelectedSubmission(null);
       } else {
-        alert("Failed to submit review: " + result.message);
+        alert("Failed: " + result.message);
       }
     } catch (error) {
-      console.error("Review submission error:", error);
-      alert("Error submitting review: " + error.message);
+      console.error("Review Process Error:", error);
+      alert("System Error: " + error.message);
     }
   };
 
-  if (authLoading) {
-    return <div className="loading-screen">Loading...</div>;
-  }
-
-  if (!isAuthenticated) {
-    return <AuthView onLogin={handleLogin} />;
-  }
+  if (authLoading) return <div className="loading-screen">Loading...</div>;
+  if (!isAuthenticated) return <AuthView onLogin={handleLogin} />;
 
   return (
     <div className="page-wrapper">
@@ -434,22 +400,19 @@ export default function App() {
                     className={`role-tab ${selectedRole === "ic" ? "role-tab-active" : ""}`}
                     onClick={() => setSelectedRole("ic")}
                   >
-                    <User className="role-icon" size={18} />
-                    <span>IC</span>
+                    <User size={18} /> <span>IC</span>
                   </button>
                   <button
                     className={`role-tab ${selectedRole === "senior-ic" ? "role-tab-active" : ""}`}
                     onClick={() => setSelectedRole("senior-ic")}
                   >
-                    <UserCheck className="role-icon" size={18} />
-                    <span>Senior IC</span>
+                    <UserCheck size={18} /> <span>Senior IC</span>
                   </button>
                   <button
                     className={`role-tab ${selectedRole === "manager" ? "role-tab-active" : ""}`}
                     onClick={() => setSelectedRole("manager")}
                   >
-                    <Users className="role-icon" size={18} />
-                    <span>Manager</span>
+                    <Users size={18} /> <span>Manager</span>
                   </button>
                 </div>
               </div>
@@ -462,7 +425,7 @@ export default function App() {
                 <GoalsSection
                   goals={reviewData.goals}
                   onGoalsChange={(goals) =>
-                    setReviewData((prev) => ({ ...prev, goals }))
+                    setReviewData((p) => ({ ...p, goals }))
                   }
                 />
               </div>
@@ -472,7 +435,7 @@ export default function App() {
                   selectedRole={selectedRole}
                   competencies={reviewData.competencies}
                   onCompetenciesChange={(competencies) =>
-                    setReviewData((prev) => ({ ...prev, competencies }))
+                    setReviewData((p) => ({ ...p, competencies }))
                   }
                 />
               </div>
@@ -481,7 +444,7 @@ export default function App() {
                 <GrowthAreas
                   growthAreas={reviewData.growthAreas}
                   onGrowthAreasChange={(growthAreas) =>
-                    setReviewData((prev) => ({ ...prev, growthAreas }))
+                    setReviewData((p) => ({ ...p, growthAreas }))
                   }
                 />
               </div>
@@ -490,7 +453,7 @@ export default function App() {
                 <SelfEvaluation
                   selfEvaluation={reviewData.selfEvaluation}
                   onSelfEvaluationChange={(selfEvaluation) =>
-                    setReviewData((prev) => ({ ...prev, selfEvaluation }))
+                    setReviewData((p) => ({ ...p, selfEvaluation }))
                   }
                 />
               </div>
@@ -499,7 +462,7 @@ export default function App() {
                 <Rating
                   rating={reviewData.overallRating}
                   onRatingChange={(overallRating) =>
-                    setReviewData((prev) => ({ ...prev, overallRating }))
+                    setReviewData((p) => ({ ...p, overallRating }))
                   }
                 />
               </div>
@@ -507,9 +470,6 @@ export default function App() {
               <button className="submit-button" onClick={handleSubmit}>
                 Submit Performance Review
               </button>
-              <p className="submit-message">
-                Reviews are tailored to your role with relevant competencies
-              </p>
             </div>
           )}
 
@@ -536,7 +496,7 @@ export default function App() {
             setShowDetailModal(false);
             setSelectedSubmission(null);
           }}
-          onApprove={handleApproveReview}
+          onApprove={handleApproveReview} // ✅ Ensure this is correct
         />
       )}
     </div>

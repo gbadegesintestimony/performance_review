@@ -67,17 +67,18 @@ export const getMySubmissions = async () => {
 
 export const reviewSubmission = async (submissionId, reviewData) => {
   try {
-    const res = await fetch(
-      `${API_ENDPOINTS.submissions}/${submissionId}/review`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(reviewData),
+    // SECURITY CHECK: Ensure submissionId is a string
+    const id =
+      typeof submissionId === "object" ? submissionId._id : submissionId;
+
+    const res = await fetch(`${API_ENDPOINTS.submissions}/${id}/review`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
       },
-    );
+      body: JSON.stringify(reviewData),
+    });
 
     if (!res.ok) {
       const error = await res.json();
