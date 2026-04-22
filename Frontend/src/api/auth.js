@@ -19,6 +19,7 @@ export const registerUser = async (userData) => {
     return data;
   } catch (error) {
     console.error("Registration error:", error);
+
     throw error;
   }
 };
