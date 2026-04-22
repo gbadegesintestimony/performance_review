@@ -377,10 +377,11 @@ const AuthView = ({ onLogin }) => {
                   type="password"
                   id="confirmPassword"
                   name="confirmPassword"
+                  autoComplete="new-password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className={errors.confirmPassword ? "error" : ""}
-                  placeholder="••••••••"
+                  placeholder="confirm your password"
                 />
                 {errors.confirmPassword && (
                   <span className="error-message">
