@@ -37,7 +37,6 @@ const competenciesData = {
 
 export default function Competencies({
   selectedRole,
-  setSelectedRole,
   competencies = {},
   onCompetenciesChange,
 }) {
@@ -57,12 +56,6 @@ export default function Competencies({
     });
   };
 
-  const tabs = [
-    { id: "ic", label: "IC" },
-    { id: "senior-ic", label: "Senior IC" },
-    { id: "manager", label: "Manager" },
-  ];
-
   return (
     <section className="section">
       <h2 className="section-title section-title-bold">
@@ -80,10 +73,9 @@ export default function Competencies({
               key={index}
               competency={competency}
               rating={competencies[competency]?.rating || 0}
-              feedback={competencies[competency]?.feedback || ""} // Pass feedback
+              feedback={competencies[competency]?.feedback || ""}
               onRatingChange={(value) => updateRating(competency, value)}
               onFeedbackChange={(value) => {
-                // New function to update feedback text
                 const current = competencies[competency] || {
                   rating: 0,
                   feedback: "",

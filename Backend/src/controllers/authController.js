@@ -60,7 +60,7 @@ export const register = async (req, res) => {
       success: true,
       data: {
         _id: userObject._id,
-        name: userObject.name, // ✅ Virtual field included
+        name: userObject.name, //  Virtual field included
         firstName: userObject.firstName,
         lastName: userObject.lastName,
         email: userObject.email,

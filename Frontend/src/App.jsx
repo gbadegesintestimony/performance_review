@@ -272,6 +272,35 @@ export default function App() {
 
       if (response.success) {
         alert("Performance Review Submitted Successfully!");
+
+        // 🌟 FIX: Reset reviewData back to a completely clean slate on success
+        setReviewData({
+          reviewPeriod: "",
+          department: currentUser?.department || "",
+          employeeInfo: {
+            name:
+              currentUser?.name ||
+              `${currentUser?.firstName || ""} ${currentUser?.lastName || ""}`.trim(),
+            role: currentUser?.role || "",
+            department: currentUser?.department || "",
+            reviewPeriod: "",
+          },
+          goals: [],
+          competencies: {},
+          growthAreas: {
+            strengths: [],
+            areasForImprovement: [],
+            developmentGoals: [],
+          },
+          selfEvaluation: {
+            accomplishments: "",
+            challenges: "",
+            learnings: "",
+            futureGoals: "",
+          },
+          overallRating: "", // Drops the star ranking components highlight back to blank
+        });
+
         const updatedSubmissions = await getMySubmissions();
         setSubmissions(
           Array.isArray(updatedSubmissions.data) ? updatedSubmissions.data : [],
