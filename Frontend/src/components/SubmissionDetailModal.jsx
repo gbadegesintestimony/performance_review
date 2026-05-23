@@ -2,6 +2,32 @@
 import React, { useState } from "react";
 import "../styles/SubmissionDetailModal.css";
 
+// Helper function to calculate relative time from database timestamp
+const getTimeAgoText = (createdAt) => {
+  if (!createdAt) return "recently";
+
+  const createdDate = new Date(createdAt);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - createdDate) / 1000);
+
+  if (diffInSeconds < 60) return "just now";
+
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays === 1) return "yesterday";
+  if (diffInDays < 7) return `${diffInDays}d ago`;
+
+  return createdDate.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+};
+
 const SubmissionDetailModal = ({
   submission,
   isManager,
@@ -36,7 +62,6 @@ const SubmissionDetailModal = ({
       const reviewData = {
         rating: rating,
         feedback: feedback,
-
         reviewedBy: currentUser?._id || currentUser?.id,
         reviewerName: currentUser?.name || "Manager",
       };
@@ -69,8 +94,9 @@ const SubmissionDetailModal = ({
               Submitted by{" "}
               {submission.employeeInfo?.name ||
                 submission.employee?.name ||
-                submission.submittedBy}{" "}
-              • {submission.timeAgo || "recently"}
+                submission.submittedBy?.name ||
+                "Unknown"}{" "}
+              • {getTimeAgoText(submission.createdAt)}
             </p>
           </div>
           <button className="close-btn" onClick={onClose}>
@@ -104,34 +130,208 @@ const SubmissionDetailModal = ({
               <div className="info-item">
                 <label>Role:</label>
                 <span>
-                  {submission.role || submission.employee?.role || "N/A"}
+                  {submission.employeeInfo?.role ||
+                    submission.employee?.role ||
+                    submission.submittedBy?.role ||
+                    "N/A"}
                 </span>
               </div>
               <div className="info-item">
                 <label>Department:</label>
-                <span>{submission.department || "N/A"}</span>
+                <span>
+                  {submission.employeeInfo?.department ||
+                    submission.department ||
+                    submission.submittedBy?.department ||
+                    "N/A"}
+                </span>
               </div>
               <div className="info-item">
-                {/* <label>Review Period:</label> */}
+                <label>Review Period:</label>
                 <span>
-                  {/* {submission.employeeInfo?.reviewPeriod ||
-                    submission.reviewPeriod ||
-                    "N/A"} */}
+                  {submission.reviewPeriod ||
+                    submission.employeeInfo?.reviewPeriod ||
+                    "N/A"}
                 </span>
               </div>
             </div>
           </section>
-          {/* Goals */}
+
+          {/* Goals (SOCIALLY DISTANCED SECTIONS) */}
           {submission.goals && submission.goals.length > 0 && (
             <section className="detail-section">
-              <h3>Goals</h3>
+              <h3>Goals & Objectives</h3>
               <ul className="goals-list">
-                {submission.goals.map((goal, index) => (
-                  <li key={index}>{goal}</li>
-                ))}
+                {submission.goals.map((goal, index) => {
+                  const isObject = goal && typeof goal === "object";
+                  const descriptionText = isObject ? goal.description : goal;
+
+                  return (
+                    <li
+                      key={goal?._id || index}
+                      className="goal-container"
+                      style={{
+                        marginBottom: "32px",
+                        paddingBottom: "16px",
+                        borderBottom:
+                          index !== submission.goals.length - 1
+                            ? "2px dashed #e2e8f0"
+                            : "none",
+                      }}
+                    >
+                      <h4
+                        style={{
+                          fontSize: "1rem",
+                          color: "black",
+                          marginBottom: "12px",
+                          transform: "uppercase",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        Goal {index + 1}
+                      </h4>
+
+                      {/* SECTION 1: Description Container */}
+                      <div
+                        className="goal-section-box description-box"
+                        style={{
+                          backgroundColor: "#f8fafc",
+                          padding: "16px",
+                          borderRadius: "8px",
+                          border: "1px solid #e2e8f0",
+                          marginBottom: "14px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: "700",
+                            color: "black",
+                            textTransform: "uppercase",
+                            marginBottom: "4px",
+                          }}
+                        >
+                          Description
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "0.95rem",
+                            fontWeight: "500",
+                            color: "#0f172a",
+                            lineHeight: "1.5",
+                          }}
+                        >
+                          {descriptionText || "Untitled Goal"}
+                        </div>
+                      </div>
+
+                      {/* SECTION 2: Progress Metrics Track Container */}
+                      {isObject && goal.progress !== undefined && (
+                        <div
+                          className="goal-section-box progress-box"
+                          style={{
+                            backgroundColor: "#f8fafc",
+                            padding: "16px",
+                            borderRadius: "8px",
+                            border: "1px solid #e2e8f0",
+                            marginBottom: "14px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "between",
+                              alignItems: "center",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: "0.75rem",
+                                fontWeight: "700",
+                                color: "#070808",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Progress Metrics
+                            </span>
+                            <span
+                              style={{
+                                marginLeft: "auto",
+                                color: "#14b8a6",
+                                fontWeight: "700",
+                                fontSize: "0.95rem",
+                              }}
+                            >
+                              {goal.progress}%
+                            </span>
+                          </div>
+                          <div
+                            style={{
+                              width: "100%",
+                              height: "8px",
+                              backgroundColor: "#e2e8f0",
+                              borderRadius: "4px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: `${goal.progress}%`,
+                                height: "100%",
+                                backgroundColor: "#14b8a6",
+                                borderRadius: "4px",
+                                transition: "width 0.3s ease",
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SECTION 3: Comments Block Container */}
+                      {isObject &&
+                        goal.comments &&
+                        goal.comments.trim() !== "" && (
+                          <div
+                            className="goal-section-box comments-box"
+                            style={{
+                              backgroundColor: "#f8fafc",
+                              padding: "16px",
+                              borderRadius: "8px",
+                              border: "1px solid #e2e8f0",
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontSize: "0.75rem",
+                                fontWeight: "700",
+                                color: "#050505",
+                                textTransform: "uppercase",
+                                marginBottom: "6px",
+                              }}
+                            >
+                              Employee Comments
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "0.9rem",
+                                fontStyle: "italic",
+                                color: "#050505",
+                                backgroundColor: "#ffffff",
+                                padding: "10px 14px",
+                                borderRadius: "6px",
+                                lineHeight: "1.4",
+                              }}
+                            >
+                              "{goal.comments}"
+                            </div>
+                          </div>
+                        )}
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           )}
+
           {/* Competencies */}
           {submission.competencies &&
             Object.keys(submission.competencies).length > 0 && (
@@ -144,7 +344,6 @@ const SubmissionDetailModal = ({
                         typeof value === "object" ? value.rating : value;
                       const feedbackText =
                         typeof value === "object" ? value.feedback : "";
-                      // Skip if rating is 0 or undefined
                       if (!ratingValue) return null;
                       return (
                         <div key={key} className="competency-item">
@@ -176,6 +375,7 @@ const SubmissionDetailModal = ({
                 </div>
               </section>
             )}
+
           {/* Growth Areas */}
           {submission.growthAreas &&
             Object.keys(submission.growthAreas).length > 0 && (
@@ -205,6 +405,7 @@ const SubmissionDetailModal = ({
                 )}
               </section>
             )}
+
           {/* Self Evaluation */}
           {submission.selfEvaluation && (
             <section className="detail-section">
@@ -238,6 +439,7 @@ const SubmissionDetailModal = ({
               )}
             </section>
           )}
+
           {/* Overall Rating */}
           {submission.overallRating && (
             <section className="detail-section">
@@ -257,6 +459,7 @@ const SubmissionDetailModal = ({
               </div>
             </section>
           )}
+
           {/* Manager Input (Only if pending) */}
           {isManager && submission.status === "pending" && (
             <section className="detail-section manager-review-section">
@@ -287,6 +490,7 @@ const SubmissionDetailModal = ({
               </div>
             </section>
           )}
+
           {/* View existing feedback if already reviewed */}
           {!isManager &&
             (submission.managerFeedback || submission.feedback) && (

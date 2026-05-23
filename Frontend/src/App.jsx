@@ -1,4 +1,3 @@
-// Frontend/src/App.jsx
 import React, { useState, useEffect } from "react";
 import { User, UserCheck, Users } from "lucide-react";
 
@@ -89,7 +88,7 @@ export default function App() {
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   const [reviewData, setReviewData] = useState({
-    reviewPeriod: "Q1 2024",
+    reviewPeriod: "",
     department: "",
     employeeInfo: {
       name: "",
@@ -117,14 +116,14 @@ export default function App() {
   const currentTab = TAB_CONFIG[activeTab];
 
   const pendingCount = submissions.filter((s) => s.status === "pending").length;
-  // const reviewedCount = submissions.filter(
-  //   (s) => s.status === "reviewed",
-  // ).length;
   const unreadReviewedCount = submissions.filter(
     (s) => s.status === "reviewed" && !s.viewedByEmployee,
   ).length;
+
+  // Header notification indicator updates instantly
   const notificationCount = isManager ? pendingCount : unreadReviewedCount;
 
+  // Restructure items array computation to group items cleanly for employees
   const notifications = React.useMemo(() => {
     const notifs = [];
     if (isManager && pendingCount > 0) {
@@ -136,26 +135,16 @@ export default function App() {
         read: false,
       });
     } else if (!isManager && unreadReviewedCount > 0) {
-      submissions
-        .filter((s) => s.status === "reviewed" && !s.viewedByEmployee)
-        .forEach((sub) => {
-          notifs.push({
-            id: `reviewed-${sub._id}`,
-            title: "Review Completed",
-            message: `Your ${sub.reviewPeriod || "the period"} review has been completed by your manager.`,
-            timeAgo: "recently",
-            read: false,
-          });
-        });
+      notifs.push({
+        id: "aggregated-reviewed-count",
+        title: "Review Completed",
+        message: `You have ${unreadReviewedCount} reviewed review${unreadReviewedCount > 1 ? "s" : ""}.`,
+        timeAgo: "recently",
+        read: false,
+      });
     }
     return notifs;
-  }, [
-    submissions,
-    isManager,
-    pendingCount,
-    unreadReviewedCount,
-    // reviewedCount,
-  ]);
+  }, [submissions, isManager, pendingCount, unreadReviewedCount]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -229,28 +218,55 @@ export default function App() {
   };
 
   const handleSubmit = async () => {
+    const structuralAreas = reviewData.growthAreas?.areas || [];
     try {
+      console.log("Submitting review data:", reviewData);
+
       const transformedData = {
-        department: reviewData.department,
-        // employeeInfo: reviewData.employeeInfo,
         reviewPeriod: reviewData.reviewPeriod,
+        department: reviewData.department,
         employeeInfo: {
-          name: currentUser?.name || "Employee",
-          role: currentUser?.role || "SeniorIC",
-          department: reviewData.department,
+          name: reviewData.employeeInfo.name,
+          role: reviewData.employeeInfo.role,
+          department: reviewData.employeeInfo.department,
           reviewPeriod: reviewData.reviewPeriod,
         },
         goals: reviewData.goals
-          .map((goal) =>
-            typeof goal === "string" ? goal : goal.description || "",
-          )
-          .filter((g) => g.trim() !== ""),
+          .filter((g) => {
+            const desc = typeof g === "string" ? g : g.description;
+            return desc && desc.trim() !== "";
+          })
+          .map((g) => {
+            if (typeof g === "string") {
+              return { description: g, progress: 0, comments: "" };
+            }
+            return {
+              description: g.description,
+              progress: Number(g.progress) || 0,
+              comments: g.comments || "",
+            };
+          }),
+
         competencies: reviewData.competencies,
-        growthAreas: reviewData.growthAreas,
+        growthAreas: {
+          strengths: structuralAreas
+            .map((item) => item.strengths || "")
+            .filter((str) => str.trim() !== ""),
+          areasForImprovement: structuralAreas
+            .map((item) => item.improvements || "")
+            .filter((str) => str.trim() !== ""),
+          developmentGoals: structuralAreas
+            .map((item) => item.developmentGoals || "")
+            .filter((str) => str.trim() !== ""),
+        },
         selfEvaluation: reviewData.selfEvaluation,
         overallRating: reviewData.overallRating,
-        stats: "pending",
       };
+
+      console.log(
+        "Transformed data being sent:",
+        JSON.stringify(transformedData, null, 2),
+      );
 
       const response = await createSubmission(transformedData);
 
@@ -265,27 +281,23 @@ export default function App() {
         alert("Failed to submit: " + response.message);
       }
     } catch (error) {
+      console.error("Submit error:", error);
       alert("Failed to submit review: " + error.message);
     }
   };
 
   const handleLogin = (response) => {
-    // If your API returns { success: true, data: { ...user } }
     const userData = response.data || response;
 
     const formattedUser = {
       ...userData,
-      // Fallback for name if virtual isn't present
       name: userData.name || `${userData.firstName} ${userData.lastName}`,
-      // Explicitly ensure department is captured
       department: userData.department,
     };
 
     setCurrentUser(formattedUser);
     setIsAuthenticated(true);
     localStorage.setItem("user", JSON.stringify(formattedUser));
-
-    // Debug check: look at your console to see if department exists here
     console.log("Logged in user:", formattedUser);
   };
 
@@ -298,24 +310,50 @@ export default function App() {
   };
 
   const handleViewDetails = (submission) => {
+    console.log("Viewing submission:", submission);
     setSelectedSubmission(submission);
     setShowDetailModal(true);
+
+    if (
+      !isManager &&
+      submission.status === "reviewed" &&
+      !submission.viewedByEmployee
+    ) {
+      // 1. Instantly update local array to trigger immediate counter markdown decrease
+      setSubmissions((prev) =>
+        prev.map((s) =>
+          s._id === submission._id ? { ...s, viewedByEmployee: true } : s,
+        ),
+      );
+
+      // 2. Persist view interaction state back to internal DB service layer
+      fetch(
+        `http://localhost:5000/api/submissions/${submission._id}/mark-viewed`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      ).catch((err) => console.error("Failed to mark as viewed:", err));
+    }
   };
 
   const handleReview = (submission) => {
+    console.log("Opening review modal:", submission);
     setSelectedSubmission(submission);
     setShowDetailModal(true);
   };
 
-  // ✅ FIXED: Using the reviewSubmission API helper and taking id as an argument
-  // Replace the old handleApproveReview (around line 202) with this:
   const handleApproveReview = async (idOrObject, feedbackData) => {
     try {
-      // RESOLVE THE ID: This checks if we were sent the whole object or just the ID string
       const id =
         typeof idOrObject === "object"
           ? idOrObject._id || idOrObject.id
           : idOrObject;
+
+      console.log("Approving review:", { id, feedbackData });
 
       if (!id || id === "undefined") {
         console.error("App.jsx Error: Received invalid ID", {
@@ -331,14 +369,12 @@ export default function App() {
       if (result.success) {
         alert("Review submitted successfully!");
 
-        // Refresh the list based on role
         const response = isManager
           ? await getPendingSubmissions()
           : await getMySubmissions();
         const freshData = response.success ? response.data : response;
         setSubmissions(Array.isArray(freshData) ? freshData : []);
 
-        // Close modal and cleanup
         setShowDetailModal(false);
         setSelectedSubmission(null);
       } else {
@@ -417,7 +453,20 @@ export default function App() {
               </div>
 
               <div className="section-container">
-                <EmployeeInfo user={currentUser} />
+                <EmployeeInfo
+                  user={currentUser}
+                  selectedPeriod={reviewData.reviewPeriod}
+                  onPeriodChange={(nextPeriod) => {
+                    setReviewData((prev) => ({
+                      ...prev,
+                      reviewPeriod: nextPeriod,
+                      employeeInfo: {
+                        ...prev.employeeInfo,
+                        reviewPeriod: nextPeriod,
+                      },
+                    }));
+                  }}
+                />
               </div>
 
               <div className="section-container">
@@ -495,7 +544,7 @@ export default function App() {
             setShowDetailModal(false);
             setSelectedSubmission(null);
           }}
-          onApprove={handleApproveReview} // ✅ Ensure this is correct
+          onApprove={handleApproveReview}
         />
       )}
     </div>

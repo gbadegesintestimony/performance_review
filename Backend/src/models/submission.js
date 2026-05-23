@@ -1,12 +1,11 @@
-// Backend/src/models/submission.js - COMPLETE MODEL
 import mongoose from "mongoose";
 
-const submissionSchema = new mongoose.Schema(
+const SubmissionSchema = new mongoose.Schema(
   {
     employee: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      // required: true,
     },
     reviewPeriod: {
       type: String,
@@ -23,38 +22,42 @@ const submissionSchema = new mongoose.Schema(
     },
 
     // Goals
-    goals: [String],
+    goals: [
+      {
+        description: { type: String, required: true },
+        progress: { type: Number, default: 0 },
+        comments: { type: String, default: "" },
+      },
+    ],
 
     // Competencies (ratings 1-5)
     competencies: {
-      technicalSkills: Number,
-      problemSolving: Number,
-      communication: Number,
-      teamwork: Number,
-      leadership: Number,
-      timeManagement: Number,
+      type: Map,
+      of: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
     // Growth Areas
     growthAreas: {
-      strengths: [String],
-      areasForImprovement: [String],
-      developmentGoals: [String],
+      strengths: { type: [String], default: [] },
+      areasForImprovement: { type: [String], default: [] },
+      developmentGoals: { type: [String], default: [] },
     },
 
     // Self Evaluation
     selfEvaluation: {
-      accomplishments: String,
-      challenges: String,
-      learnings: String,
-      futureGoals: String,
+      accomplishments: { type: String, default: "" },
+      challenges: { type: String, default: "" },
+      learnings: { type: String, default: "" },
+      futureGoals: { type: String, default: "" },
     },
 
     // Overall Rating
     overallRating: {
       type: Number,
-      min: 1,
+      min: 0,
       max: 5,
+      default: 0,
     },
 
     // Status
@@ -66,13 +69,25 @@ const submissionSchema = new mongoose.Schema(
 
     // Manager Feedback (added when reviewed)
     managerFeedback: {
-      rating: Number,
+      rating: { type: Number, min: 0, max: 5 },
       comments: String,
+      feedback: String,
       reviewedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
+      reviewerName: String,
       reviewedAt: Date,
+    },
+    submittedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    viewedByEmployee: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -80,4 +95,6 @@ const submissionSchema = new mongoose.Schema(
   },
 );
 
-export default mongoose.model("Submission", submissionSchema);
+const Submission =
+  mongoose.models.Submission || mongoose.model("Submission", SubmissionSchema);
+export default Submission;

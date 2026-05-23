@@ -1,8 +1,81 @@
-// Frontend/src/components/SubmissionCard.jsx - MANAGER NO VIEW DETAILS
+// Frontend/src/components/SubmissionCard.jsx
 import React from "react";
 import "../styles/SubmissionCard.css";
 
 const SubmissionCard = ({ submission, isManager, onViewDetails, onReview }) => {
+  // SAFETY HELPER: Safely extracts a printable string name from nested object fields
+  const getEmployeeDisplayText = () => {
+    if (!submission) return "Unknown";
+
+    // 1. Check submittedBy field
+    if (submission.submittedBy) {
+      if (typeof submission.submittedBy === "object") {
+        return submission.submittedBy.name || submission.submittedBy.email;
+      }
+      return submission.submittedBy;
+    }
+
+    // 2. Check employee field
+    if (submission.employee) {
+      if (typeof submission.employee === "object") {
+        return submission.employee.name || submission.employee.email;
+      }
+      return submission.employee;
+    }
+
+    // 3. Check employeeInfo field
+    if (submission.employeeInfo) {
+      if (typeof submission.employeeInfo === "object") {
+        return submission.employeeInfo.name || submission.employeeInfo.email;
+      }
+      return submission.employeeInfo;
+    }
+
+    // 4. Check user field fallback (standard Mongoose populations usually sit here)
+    if (submission.user) {
+      if (typeof submission.user === "object") {
+        return submission.user.name || submission.user.email;
+      }
+      return submission.user;
+    }
+
+    return "Unknown Employee";
+  };
+
+  // 👇 FIXED TIMESTAMP HELPER: Uses reviewedAt for reviewed cards, falls back to createdAt
+  const getTimeAgoText = () => {
+    if (!submission) return "recently";
+
+    // If status is reviewed, target managerFeedback.reviewedAt. Fallback to createdAt if missing or pending.
+    const referenceTimestamp =
+      submission.status === "reviewed" && submission.managerFeedback?.reviewedAt
+        ? submission.managerFeedback.reviewedAt
+        : submission.createdAt;
+
+    if (!referenceTimestamp) return "recently";
+
+    const createdDate = new Date(referenceTimestamp);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - createdDate) / 1000);
+
+    if (diffInSeconds < 60) return "just now";
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays === 1) return "yesterday";
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+
+    return createdDate.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   return (
     <div className="submission-card">
       <div className="submission-header">
@@ -33,13 +106,9 @@ const SubmissionCard = ({ submission, isManager, onViewDetails, onReview }) => {
           </div>
           <div className="submission-details">
             <h3 className="submission-title">{`Performance Review`}</h3>
+
             <p className="submission-meta">
-              By{" "}
-              {submission.submittedBy ||
-                submission.employee?.name ||
-                submission.employeeInfo?.name ||
-                "Unknown"}{" "}
-              • {submission.timeAgo || "recently"}
+              By {getEmployeeDisplayText()} • {getTimeAgoText()}
             </p>
           </div>
         </div>
@@ -53,8 +122,8 @@ const SubmissionCard = ({ submission, isManager, onViewDetails, onReview }) => {
       </div>
 
       <div className="submission-actions">
-        {/* ✅ IC/Senior IC: Show View Details */}
-        {!isManager && (
+        {/* IC/Senior IC: Show View Details */}
+        {(!isManager || (isManager && submission.status !== "pending")) && (
           <button
             className="action-button action-view"
             onClick={() => onViewDetails && onViewDetails(submission)}
@@ -87,10 +156,10 @@ const SubmissionCard = ({ submission, isManager, onViewDetails, onReview }) => {
           </button>
         )}
 
-        {/* ✅ Manager: Show Review button for pending submissions */}
+        {/* Manager: Show Review button for pending submissions */}
         {isManager && onReview && submission.status === "pending" && (
           <button
-            className="action-button"
+            className="action-button action-review-main"
             onClick={() => onReview(submission)}
           >
             <svg

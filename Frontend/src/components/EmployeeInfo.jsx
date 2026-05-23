@@ -1,13 +1,12 @@
+// Frontend/src/components/EmployeeInfo.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Briefcase, ChevronDown } from "lucide-react";
 import "../styles/section.css";
 import "../styles/form.css";
 
-export default function EmployeeInfo({ user, onReviewPeriodChange }) {
+export default function EmployeeInfo({ user, selectedPeriod, onPeriodChange }) {
   const [isDeptOpen, setIsDeptOpen] = useState(false);
-  const [selectedDept, setSelectedDept] = useState("");
   const [isPeriodOpen, setIsPeriodOpen] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState("");
 
   // Refs to detect clicks outside the dropdowns
   const deptRef = useRef(null);
@@ -37,6 +36,9 @@ export default function EmployeeInfo({ user, onReviewPeriodChange }) {
   ];
   const periods = ["Q1 2024", "Q2 2024", "Q3 2024", "Q4 2024", "Annual 2024"];
 
+  // Use the user profile values directly to avoid cascading render side-effects
+  const currentDepartment = user?.department || "";
+
   return (
     <section className="section">
       <h2 className="section-title section-title-bold">
@@ -46,7 +48,13 @@ export default function EmployeeInfo({ user, onReviewPeriodChange }) {
         {/* Employee Name */}
         <div className="form-group">
           <label className="form-label">Employee Name *</label>
-          <input type="text" placeholder="Full name" className="form-input" />
+          <input
+            type="text"
+            placeholder="Full name"
+            className="form-input"
+            value={user?.name || ""}
+            readOnly
+          />
         </div>
 
         {/* Review Period */}
@@ -73,9 +81,9 @@ export default function EmployeeInfo({ user, onReviewPeriodChange }) {
                     key={p}
                     className="custom-select-option"
                     onClick={() => {
-                      if ((user, onReviewPeriodChange)) onReviewPeriodChange(p);
-                      setSelectedPeriod(p);
-                      onReviewPeriodChange?.(p);
+                      if (onPeriodChange) {
+                        onPeriodChange(p);
+                      }
                       setIsPeriodOpen(false);
                     }}
                   >
@@ -93,12 +101,15 @@ export default function EmployeeInfo({ user, onReviewPeriodChange }) {
           <div className="custom-select-container">
             <div
               className={`custom-select-header ${
-                !selectedDept ? "placeholder" : ""
+                !currentDepartment ? "placeholder" : ""
               }`}
               onClick={() => setIsDeptOpen(!isDeptOpen)}
             >
-              <span className="truncate">
-                {selectedDept || "Select department"}
+              <span
+                className="truncate"
+                style={{ textTransform: "capitalize" }}
+              >
+                {currentDepartment || "Select department"}
               </span>
               <ChevronDown
                 className={`select-arrow ${isDeptOpen ? "open" : ""}`}
@@ -111,7 +122,7 @@ export default function EmployeeInfo({ user, onReviewPeriodChange }) {
                     key={d}
                     className="custom-select-option"
                     onClick={() => {
-                      setSelectedDept(d);
+                      // Handled strictly as read-only profile sync or left open for extension
                       setIsDeptOpen(false);
                     }}
                   >

@@ -152,7 +152,7 @@
   margin-bottom: 8px;
   border-radius: 6px;
   font-size: 0.9375rem;
-  color: #374151;
+  color: black;
 }
 
 .competencies-grid {
@@ -224,6 +224,7 @@
   padding: 12px 16px;
   background-color: #f9fafb;
   border-radius: 6px;
+  border-left: 3px solid #2d9d8e;
 }
 
 .overall-rating {

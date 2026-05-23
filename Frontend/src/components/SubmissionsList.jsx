@@ -1,4 +1,3 @@
-// Frontend/src/components/SubmissionsList.jsx - MANAGER NO VIEW DETAILS
 import React, { useState } from "react";
 import SubmissionCard from "./SubmissionCard";
 import "../styles/SubmissionsList.css";
@@ -21,9 +20,10 @@ const SubmissionsList = ({
     return status === "pending";
   }).length;
 
-  const reviewedCount = submissions.filter((s) => {
+  // 🛠️ CHANGED HERE: Only count reviewed submissions that the employee HAS NOT viewed yet
+  const unreadReviewedCount = submissions.filter((s) => {
     const status = (s?.status || "").toString().trim().toLowerCase();
-    return status === "reviewed";
+    return status === "reviewed" && !s.viewedByEmployee;
   }).length;
 
   return (
@@ -43,8 +43,9 @@ const SubmissionsList = ({
           onClick={() => setActiveFilter("reviewed")}
         >
           Reviewed
-          {reviewedCount > 0 && (
-            <span className="filter-count">{reviewedCount}</span>
+          {/* 🛠️ CHANGED HERE: Uses the dynamic unreadReviewedCount variable now */}
+          {unreadReviewedCount > 0 && (
+            <span className="filter-count">{unreadReviewedCount}</span>
           )}
         </button>
       </div>
@@ -79,7 +80,7 @@ const SubmissionsList = ({
         ) : (
           filteredSubmissions.map((submission) => (
             <SubmissionCard
-              key={submission._id || submission.id}
+              key={submission._id || submission.id || submission.user?.name}
               submission={submission}
               isManager={isManager}
               onViewDetails={onViewDetails}

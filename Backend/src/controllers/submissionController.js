@@ -1,108 +1,242 @@
-// Backend/src/controllers/submissionController.js - FIXED VERSION
-import {
-  createSubmissionService,
-  getPendingSubmissionsService,
-  getMySubmissionsService,
-  reviewSubmissionService,
-} from "../services/submissionServices.js";
+// Backend/src/controllers/submissionController.js - COMPLETE FIX
+import Submission from "../models/Submission.js";
 
+//  CREATE SUBMISSION (IC/Senior IC submits review)
 export const createSubmission = async (req, res) => {
   try {
-    console.log("Creating submission for user:", req.user._id);
-    console.log("Submission data:", req.body);
+    console.log(
+      " Backend received submission data:",
+      JSON.stringify(req.body, null, 2),
+    );
 
-    const submission = await createSubmissionService(req.body, req.user._id);
+    const incomingGrowthAreas = req.body.growthAreas || {};
 
-    console.log("Submission created successfully:", submission._id);
+    const growthAreas = {
+      strengths:
+        incomingGrowthAreas.strengths || incomingGrowthAreas.areas || [],
+      areasForImprovement: incomingGrowthAreas.areasForImprovement || [],
+      developmentGoals: incomingGrowthAreas.developmentGoals || [],
+    };
+
+    const submissionData = {
+      reviewPeriod: req.body.reviewPeriod,
+      department: req.body.department,
+      employeeInfo: req.body.employeeInfo,
+      goals: req.body.goals || [],
+      competencies: req.body.competencies || {},
+      growthAreas: growthAreas,
+      selfEvaluation: req.body.selfEvaluation || {
+        accomplishments: "",
+        challenges: "",
+        learnings: "",
+        futureGoals: "",
+      },
+      overallRating: req.body.overallRating || 0,
+      submittedBy: req.user._id, // From auth middleware
+      status: "pending",
+      viewedByEmployee: false,
+    };
+
+    console.log(
+      " Saving to database:",
+      JSON.stringify(submissionData, null, 2),
+    );
+
+    const submission = await Submission.create(submissionData);
+
+    console.log(" Successfully saved:", JSON.stringify(submission, null, 2));
 
     res.status(201).json({
       success: true,
-      data: submission,
       message: "Submission created successfully",
+      data: submission,
     });
   } catch (error) {
-    console.error("Create submission error:", error);
+    console.error(" Create submission error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to create submission",
+      error: error.message,
     });
   }
 };
 
-export const getPendingSubmissions = async (req, res) => {
-  try {
-    console.log("Fetching pending submissions for manager:", req.user._id);
-
-    const submissions = await getPendingSubmissionsService();
-
-    console.log(`Found ${submissions.length} pending submissions`);
-
-    res.json({
-      success: true,
-      data: submissions,
-      count: submissions.length,
-    });
-  } catch (error) {
-    console.error("Get pending submissions error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-// ✅ NEW: Get employee's own submissions
+//  GET MY SUBMISSIONS (IC/Senior IC view their submissions)
 export const getMySubmissions = async (req, res) => {
   try {
-    console.log("Fetching submissions for employee:", req.user._id);
+    const submissions = await Submission.find({
+      submittedBy: req.user._id,
+    })
+      .populate("submittedBy", "name email role department")
+      .sort({ createdAt: -1 })
+      .lean();
 
-    const submissions = await getMySubmissionsService(req.user._id);
+    console.log(
+      ` Found ${submissions.length} submissions for user ${req.user._id}`,
+    );
 
-    console.log(`Found ${submissions.length} submissions for this employee`);
-
-    res.json({
+    res.status(200).json({
       success: true,
       data: submissions,
-      count: submissions.length,
     });
   } catch (error) {
-    console.error("Get my submissions error:", error);
+    console.error(" Get my submissions error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to fetch submissions",
+      error: error.message,
     });
   }
 };
 
-// ✅ NEW: Review submission (mark as reviewed)
-export const reviewSubmission = async (req, res) => {
+//  GET PENDING SUBMISSIONS (Manager view)
+export const getPendingSubmissions = async (req, res) => {
   try {
-    const { submissionId } = req.params;
-    const { rating, feedback } = req.body;
+    const submissions = await Submission.find({
+      status: "pending",
+    })
+      .populate("submittedBy", "name email role department")
+      .sort({ createdAt: -1 })
+      .lean();
 
-    console.log(
-      "Reviewing submission:",
-      submissionId,
-      "by manager:",
-      req.user._id,
-    );
+    console.log(` Found ${submissions.length} pending submissions for manager`);
 
-    const submission = await reviewSubmissionService(
-      submissionId,
-      req.user._id,
-      { rating, feedback, status: "reviewed" },
-    );
-
-    res.json({
+    res.status(200).json({
       success: true,
-      data: submission,
-      message: "Submission reviewed successfully",
+      data: submissions,
     });
   } catch (error) {
-    console.error("Review submission error:", error);
+    console.error(" Get pending submissions error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to fetch pending submissions",
+      error: error.message,
     });
   }
+};
+
+//  REVIEW SUBMISSION (Manager approves and gives feedback)
+export const reviewSubmission = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, feedback, reviewedBy, reviewerName } = req.body;
+
+    console.log(`📝 Manager reviewing submission ${id}:`, {
+      rating,
+      feedback,
+      reviewedBy,
+      reviewerName,
+    });
+
+    const submission = await Submission.findByIdAndUpdate(
+      id,
+      {
+        status: "reviewed",
+        managerFeedback: {
+          rating,
+          feedback,
+          reviewedBy,
+          reviewerName,
+          reviewedAt: new Date(),
+        },
+      },
+      { new: true },
+    );
+
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        message: "Submission not found",
+      });
+    }
+
+    console.log("✅ Review saved successfully:", submission);
+
+    res.status(200).json({
+      success: true,
+      message: "Review submitted successfully",
+      data: submission,
+    });
+  } catch (error) {
+    console.error("❌ Review submission error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to review submission",
+      error: error.message,
+    });
+  }
+};
+
+//  MARK SUBMISSION AS VIEWED (IC marks manager feedback as read)
+export const markAsViewed = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log(` Marking submission ${id} as viewed by employee`);
+
+    const submission = await Submission.findByIdAndUpdate(
+      id,
+      { viewedByEmployee: true },
+      { new: true },
+    );
+
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        message: "Submission not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Marked as viewed",
+      data: submission,
+    });
+  } catch (error) {
+    console.error(" Mark as viewed error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to mark as viewed",
+      error: error.message,
+    });
+  }
+};
+
+//  GET SINGLE SUBMISSION (View details)
+export const getSubmission = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const submission = await Submission.findById(id)
+      .populate("submittedBy", "name email role department")
+      .lean();
+
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        message: "Submission not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: submission,
+    });
+  } catch (error) {
+    console.error("❌ Get submission error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch submission",
+      error: error.message,
+    });
+  }
+};
+
+export default {
+  createSubmission,
+  getMySubmissions,
+  getPendingSubmissions,
+  reviewSubmission,
+  markAsViewed,
+  getSubmission,
 };
