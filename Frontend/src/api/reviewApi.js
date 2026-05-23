@@ -1,16 +1,27 @@
-const BASE_URL = "http://localhost:5000/api/reviews";
+// src/api/reviewApi.js
+import { API_ENDPOINTS } from "../config/api";
 
 const getToken = () => localStorage.getItem("token");
 
 export const createReview = async (data) => {
-  const res = await fetch(BASE_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getToken()}`,
-    },
-    body: JSON.stringify(data),
-  });
+  try {
+    const res = await fetch(API_ENDPOINTS.reviews, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(data),
+    });
 
-  return res.json();
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "Failed to create review");
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Create review error:", error);
+    throw error;
+  }
 };
