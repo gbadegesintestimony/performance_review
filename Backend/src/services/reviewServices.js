@@ -1,5 +1,5 @@
 import Review from "../models/Review.js";
-import Submission from "../models/submission.js";
+import Submission from "../models/Submission.js";
 
 export const createReviewServices = async (
   submissionId,

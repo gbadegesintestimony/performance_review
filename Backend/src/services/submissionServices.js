@@ -1,5 +1,5 @@
 // Backend/src/services/submissionServices.js - FIXED VERSION
-import Submission from "../models/submission.js";
+import Submission from "../models/Submission.js";
 
 export const createSubmissionService = async (data, userId) => {
   console.log("Creating submission with data:", data);
