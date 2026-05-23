@@ -31,7 +31,7 @@ export const createSubmission = async (req, res) => {
         learnings: "",
         futureGoals: "",
       },
-      overallRating: req.body.overallRating || 0,
+      overallRating: req.body.overallRating || "",
       submittedBy: req.user._id, // From auth middleware
       status: "pending",
       viewedByEmployee: false,

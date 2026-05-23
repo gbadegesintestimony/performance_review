@@ -14,10 +14,10 @@ const startServer = async () => {
 
     // 2. Only start listening if DB connection is successful
     app.listen(PORT, () => {
-      console.log(`✅ Server running on port ${PORT}`);
+      console.log(` Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error("❌ Failed to start server:", error.message);
+    console.error(" Failed to start server:", error.message);
     process.exit(1);
   }
 };
