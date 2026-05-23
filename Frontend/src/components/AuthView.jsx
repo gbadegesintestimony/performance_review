@@ -12,7 +12,7 @@ const AuthView = ({ onLogin }) => {
     lastName: "",
     employeeId: "",
     department: "",
-    role: "employee",
+    role: "ic", // Changed default to match a lowercase option value
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +23,6 @@ const AuthView = ({ onLogin }) => {
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
 
     setErrors((prev) => {
       const newErrors = { ...prev };
@@ -36,14 +35,12 @@ const AuthView = ({ onLogin }) => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Email validation
     if (!formData.email) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
 
-    // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
@@ -54,7 +51,6 @@ const AuthView = ({ onLogin }) => {
       newErrors.password = "Password needs at least one number";
     }
 
-    // Registration-specific validations
     if (!isLogin) {
       if (!formData.firstName) {
         newErrors.firstName = "First name is required";
@@ -67,6 +63,9 @@ const AuthView = ({ onLogin }) => {
       }
       if (!formData.department) {
         newErrors.department = "Department is required";
+      }
+      if (!formData.role) {
+        newErrors.role = "Role selection is required";
       }
       if (!formData.confirmPassword) {
         newErrors.confirmPassword = "Please confirm your password";
@@ -91,21 +90,16 @@ const AuthView = ({ onLogin }) => {
 
     try {
       if (isLogin) {
-        // ✅ CALL REAL LOGIN API
         const response = await loginUser({
           email: formData.email,
           password: formData.password,
         });
 
-        // Check if backend returned success
         if (response.success && response.data) {
           const { token, _id, firstName, lastName, email, role, department } =
             response.data;
 
-          // Store token in localStorage
           localStorage.setItem("token", token);
-
-          // Store user info
           localStorage.setItem(
             "user",
             JSON.stringify({
@@ -117,7 +111,6 @@ const AuthView = ({ onLogin }) => {
             }),
           );
 
-          // Call onLogin to update App state
           if (onLogin) {
             onLogin({
               _id,
@@ -129,12 +122,21 @@ const AuthView = ({ onLogin }) => {
             });
           }
         } else {
-          // Handle error response
           setErrors({
             email: response.message || "Login failed. Please try again.",
           });
         }
       } else {
+        // ✅ Normalized matching mechanism preventing data leaking from departments
+        let formattedRole = "IC";
+        const selectedRole = String(formData.role).toLowerCase();
+
+        if (selectedRole === "senioric") {
+          formattedRole = "SeniorIC";
+        } else if (selectedRole === "manager") {
+          formattedRole = "Manager";
+        }
+
         const response = await registerUser({
           name: `${formData.firstName} ${formData.lastName}`,
           firstName: formData.firstName,
@@ -143,34 +145,21 @@ const AuthView = ({ onLogin }) => {
           password: formData.password,
           employeeId: formData.employeeId,
           department: formData.department,
-          role:
-            formData.role === "ic"
-              ? "IC"
-              : formData.role === "senioric"
-                ? "SeniorIC"
-                : formData.role === "manager"
-                  ? "Manager"
-                  : formData.role === "department"
-                    ? "Department"
-                    : formData.department,
+          role: formattedRole,
         });
 
         if (response.success && response.data) {
           alert("Registration successful! Please login with your credentials.");
-
-          // Switch to login mode
           setIsLogin(true);
-
-          // Clear form
           setFormData({
-            email: formData.email, // Keep email so they can login easily
+            email: formData.email,
             password: "",
             confirmPassword: "",
             firstName: "",
             lastName: "",
             employeeId: "",
             department: "",
-            role: "",
+            role: "ic",
           });
         } else {
           setErrors({
@@ -180,9 +169,7 @@ const AuthView = ({ onLogin }) => {
       }
     } catch (error) {
       console.error("Authentication error:", error);
-
       const serverMessage = error.message;
-
       const displayMessage =
         serverMessage === "Failed to fetch"
           ? "Server is currently offline. Please check your connection."
@@ -206,7 +193,7 @@ const AuthView = ({ onLogin }) => {
       lastName: "",
       employeeId: "",
       department: "",
-      role: "",
+      role: "ic",
     });
   };
 
@@ -326,13 +313,15 @@ const AuthView = ({ onLogin }) => {
                     name="role"
                     value={formData.role}
                     onChange={handleChange}
-                    required
+                    className={errors.role ? "error" : ""}
                   >
-                    <option value="">Select role</option>
                     <option value="ic">IC</option>
-                    <option value="SeniorIC">SeniorIC</option>
+                    <option value="senioric">SeniorIC</option>
                     <option value="manager">Manager</option>
                   </select>
+                  {errors.role && (
+                    <span className="error-message">{errors.role}</span>
+                  )}
                 </div>
               </>
             )}
