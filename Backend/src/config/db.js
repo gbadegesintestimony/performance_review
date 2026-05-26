@@ -7,8 +7,7 @@ const connectDB = async () => {
   mongoose.set("strictQuery", true);
 
   if (!process.env.MONGO_URI) {
-    console.error("MONGO_URI is missing in environment variables");
-    return;
+    throw new Error("MONGO_URI is missing in environment variables");
   }
 
   if (isConnected) {

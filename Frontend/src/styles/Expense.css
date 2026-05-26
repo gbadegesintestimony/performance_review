@@ -1,0 +1,72 @@
+.expense-page-bg {
+  min-height: 100vh;
+  background: #f6f7f9;
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+.expense-form-card {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  border: 1px solid #e6e8eb;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.expense-form-card h2 { font-size: 18px; margin-bottom: 14px; }
+.expense-form-card label { display: block; margin: 18px 0 6px; font-weight: 600; font-size: 14px; }
+.type-list, .travel-locations, .mileage-locations, .meal-type-options { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+.type-item { border: 1px solid #e4e6ea; border-radius: 10px; padding: 16px 12px; min-height: 92px; cursor: pointer; background: #f6f7f9; display: flex; gap: 8px; }
+.type-item.active { border-color: #2c9a89; background: #eef8f6; }
+.type-item p { font-size: 12px; color: #666; margin-top: 4px; }
+.amount-box, .location-input, .days-input, .attendees-input { display: flex; align-items: center; border: 1px solid #e4e6ea; border-radius: 8px; padding: 0 10px; background: #f6f7f9; }
+.amount-box input, .location-input input, .days-input input, .attendees-input input { border: none; background: transparent; width: 100%; padding: 12px 0 12px 8px; }
+select, textarea, .mileage-details-card input[type="number"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e4e6ea; background: #f6f7f9; }
+textarea { min-height: 104px; resize: none; }
+.travel-details-card, .meal-details-card, .mileage-details-card { margin-top: 14px; border: 1px solid #e4e6ea; border-radius: 10px; background: #eef8f6; padding: 14px; }
+.travel-details-title, .meal-details-title, .mileage-details-title { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #2c9a89; }
+.meal-type-btn { border: 1px solid #d8dde3; background: #f6f7f9; color: #555; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: 600; cursor: pointer; text-transform: capitalize; }
+.meal-type-btn.active { background: #2c9a89; border-color: #2c9a89; color: #fff; }
+.mileage-summary-field { margin-top: 12px; border: 1px solid #e4e6ea; border-radius: 8px; background: #f6f7f9; padding: 12px; display: flex; justify-content: space-between; }
+.mileage-total { color: #2c9a89; font-weight: 700; }
+.custom-select { position: relative; }
+.custom-select-trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 8px; border: 1px solid #d9e3df; background: #f6f7f9; cursor: pointer; }
+.custom-select-menu { position: absolute; top: calc(100% + 8px); left: 0; width: 100%; border: 1px solid #d9e3df; border-radius: 10px; background: #fff; box-shadow: 0 12px 24px rgba(28, 52, 47, 0.1); padding: 6px; z-index: 20; }
+.custom-select-option { width: 100%; border: none; border-radius: 8px; background: transparent; padding: 10px 12px; text-align: left; cursor: pointer; }
+.custom-select-option.selected { background: #2c9a89; color: #fff; }
+.date-input-container { position: relative; }
+.date-display.dropdown { width: 100%; background: #f6f7f9; padding: 14px 12px; border-radius: 8px; border: 1px solid #e4e6ea; text-align: left; cursor: pointer; }
+.date-display-left { display: inline-flex; align-items: center; gap: 10px; }
+.custom-calendar { position: absolute; top: calc(100% + 8px); left: 0; width: 320px; max-width: 100%; background: #fff; border: 1px solid #d9e3df; border-radius: 12px; box-shadow: 0 18px 30px rgba(28, 52, 47, 0.12); padding: 12px; z-index: 30; }
+.calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.calendar-title-group { display: flex; align-items: center; gap: 8px; }
+.calendar-year-btn, .calendar-nav-btn { border: 1px solid #d9e3df; border-radius: 10px; background: #f6f7f9; color: #2c9a89; cursor: pointer; }
+.calendar-year-btn { padding: 6px 10px; display: inline-flex; align-items: center; gap: 6px; }
+.calendar-nav-btn { width: 30px; height: 30px; display: grid; place-items: center; }
+.calendar-year-list { max-height: 160px; overflow-y: auto; border: 1px solid #d9e3df; border-radius: 10px; background: #f8fbfa; padding: 6px; margin-bottom: 10px; }
+.calendar-year-option { width: 100%; border: none; border-radius: 8px; background: transparent; padding: 8px 10px; text-align: left; cursor: pointer; }
+.calendar-year-option.active { background: #2c9a89; color: #fff; }
+.calendar-weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.calendar-day { border: 1px solid transparent; border-radius: 8px; background: #f6f7f9; min-height: 34px; font-size: 12px; cursor: pointer; }
+.calendar-day.muted { color: #a0ada8; background: #fbfbfc; }
+.calendar-day.today { border-color: #2c9a89; }
+.calendar-day.selected { background: #2c9a89; color: #fff; }
+.upload-area { border: 2px dashed #dcdcdc; border-radius: 10px; padding: 24px 18px; min-height: 130px; text-align: center; position: relative; background: #f6f7f9; }
+.upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-line { margin-top: 8px; font-size: 14px; color: #555; }
+.upload-hint { display: block; margin-top: 6px; font-size: 12px; color: #888; }
+.uploaded-files { margin-top: 14px; }
+.file-item { display: flex; justify-content: space-between; align-items: center; border: 1px solid #e4e6ea; border-radius: 8px; padding: 10px; background: #fff; margin-top: 8px; }
+.file-info { display: flex; align-items: center; gap: 8px; }
+.file-info span { display: block; font-size: 12px; color: #666; }
+.remove-file-btn { border: none; background: transparent; cursor: pointer; color: #666; }
+.submit-expense { margin-top: 24px; width: 100%; padding: 14px; border: none; border-radius: 10px; background: #2c9a89; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.submit-expense:disabled { opacity: 0.7; cursor: wait; }
+.submit-status { margin-top: 10px; font-size: 13px; color: #2c9a89; text-align: center; }
+
+@media (max-width: 600px) {
+  .travel-locations, .meal-type-options, .mileage-locations, .type-list { grid-template-columns: 1fr; }
+}
