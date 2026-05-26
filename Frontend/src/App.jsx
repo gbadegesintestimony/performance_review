@@ -22,6 +22,7 @@ import Competencies from "./components/Competencies";
 import GrowthAreas from "./components/GrowthAreas";
 import SelfEvaluation from "./components/SelfEvaluation";
 import Rating from "./components/Rating";
+import Expense from "./components/Expense";
 
 import "./App.css";
 import "./styles/layout.css";
@@ -550,7 +551,9 @@ export default function App() {
             </div>
           )}
 
-          {["timesheet", "builder", "tasks", "expense"].includes(activeTab) && (
+          {activeTab === "expense" && <Expense />}
+
+          {["timesheet", "builder", "tasks"].includes(activeTab) && (
             <PlaceholderView title={TAB_CONFIG[activeTab].label} />
           )}
         </div>
