@@ -23,6 +23,7 @@ import GrowthAreas from "./components/GrowthAreas";
 import SelfEvaluation from "./components/SelfEvaluation";
 import Rating from "./components/Rating";
 import Expense from "./components/Expense";
+import Builder from "./components/Builder";
 
 import "./App.css";
 import "./styles/layout.css";
@@ -433,8 +434,14 @@ export default function App() {
 
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <main className="main-content">
-        <div className="content-container">
+      <main
+        className={`main-content ${activeTab === "builder" ? "main-content-builder" : ""}`}
+        style={activeTab === "builder" ? { maxWidth: "1140px" } : undefined}
+      >
+        <div
+          className={`content-container ${activeTab === "builder" ? "content-container-builder" : ""}`}
+          style={activeTab === "builder" ? { maxWidth: "980px" } : undefined}
+        >
           {activeTab === "submissions" && (
             <>
               {loading ? (
@@ -552,8 +559,9 @@ export default function App() {
           )}
 
           {activeTab === "expense" && <Expense />}
+          {activeTab === "builder" && <Builder />}
 
-          {["timesheet", "builder", "tasks"].includes(activeTab) && (
+          {["timesheet", "tasks"].includes(activeTab) && (
             <PlaceholderView title={TAB_CONFIG[activeTab].label} />
           )}
         </div>
