@@ -6,6 +6,7 @@ import { apiLimiter } from "./middleware/rateLimiter.js";
 import submissionRoutes from "./routes/submissionRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import expenseRoutes from "./routes/expenseRoutes.js";
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/api/", apiLimiter);
 app.use("/api/auth", authRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/expenses", expenseRoutes);
 
 // Health check route
 app.get("/", (req, res) => {

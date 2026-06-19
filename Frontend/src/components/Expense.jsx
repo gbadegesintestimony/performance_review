@@ -16,6 +16,7 @@ import {
   X,
   MapPin,
 } from "lucide-react";
+import { createExpense } from "../api/expenseApi";
 import "../styles/Expense.css";
 
 function Expense() {
@@ -215,12 +216,52 @@ function Expense() {
   };
 
   const handleSubmitExpense = async () => {
+    if (!expenseType) {
+      setSubmitMessage("Please choose an expense type before submitting.");
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitMessage("");
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    resetExpenseForm();
-    setSubmitMessage("Expense draft saved (frontend-only mode).");
-    setIsSubmitting(false);
+
+    const attachments = uploadedFiles.map(({ name, size, file }) => ({
+      name,
+      size: Number.parseFloat(size) || 0,
+      type: file?.type || "",
+    }));
+
+    const normalizedAmount =
+      expenseType === "mileage" ? mileageTotal : Number.parseFloat(amount) || 0;
+
+    try {
+      const response = await createExpense({
+        expenseType,
+        amount: normalizedAmount,
+        project,
+        description,
+        expenseDate: selectedDate || formatISODate(today),
+        travelPurpose,
+        fromCity,
+        toCity,
+        travelDays: travelDays ? Number.parseInt(travelDays, 10) : null,
+        mealType,
+        attendees,
+        mealBusinessPurpose,
+        startLocation,
+        endLocation,
+        distanceMiles: distanceMiles ? Number.parseFloat(distanceMiles) : null,
+        mileageRate,
+        mileageTotal,
+        attachments,
+      });
+
+      resetExpenseForm();
+      setSubmitMessage(response.message || "Expense saved successfully.");
+    } catch (error) {
+      setSubmitMessage(error.message || "Failed to save expense.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
