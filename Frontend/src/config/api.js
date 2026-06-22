@@ -9,6 +9,7 @@ const API_BASE_URL = (
 export const API_ENDPOINTS = {
   auth: `${API_BASE_URL}/api/auth`,
   expenses: `${API_BASE_URL}/api/expenses`,
+  forms: `${API_BASE_URL}/api/forms`,
   submissions: `${API_BASE_URL}/api/submissions`,
   reviews: `${API_BASE_URL}/api/reviews`,
 };

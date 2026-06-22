@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Eye,
   Save,
@@ -19,7 +19,32 @@ import {
   GripVertical,
   CircleCheck,
 } from "lucide-react";
+import {
+  createFormTemplate,
+  getMyFormTemplates,
+  updateFormTemplate,
+} from "../api/formTemplateApi";
 import "../styles/Builder.css";
+
+const buildTemplatePayload = (state) => ({
+  name: state.formName,
+  description: state.formDescription,
+  formFields: state.formFields,
+  placeholderMap: state.placeholderMap,
+  helpTextMap: state.helpTextMap,
+  fieldWidthMap: state.fieldWidthMap,
+  validationExpanded: state.validationExpanded,
+  requiredMap: state.requiredMap,
+  validationRulesMap: state.validationRulesMap,
+  ruleMenuOpen: state.ruleMenuOpen,
+  conditionalExpanded: state.conditionalExpanded,
+  conditionalEnabled: state.conditionalEnabled,
+  conditionalAction: state.conditionalAction,
+  conditionalField: state.conditionalField,
+  conditionalCondition: state.conditionalCondition,
+  conditionalValue: state.conditionalValue,
+  defaultValueMap: state.defaultValueMap,
+});
 
 function Builder() {
   const [isPreview, setIsPreview] = useState(false);
@@ -45,6 +70,7 @@ function Builder() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [activeTemplateId, setActiveTemplateId] = useState("");
   const toastTimeoutRef = useRef(null);
 
   const FIELD_TYPES = [
@@ -67,6 +93,50 @@ function Builder() {
       toastTimeoutRef.current = null;
     }, 2200);
   };
+
+  const loadTemplateIntoState = (template) => {
+    setFormName(template.name || "");
+    setFormDescription(template.description || "");
+    setFormFields(Array.isArray(template.formFields) ? template.formFields : []);
+    setPlaceholderMap(template.placeholderMap || {});
+    setHelpTextMap(template.helpTextMap || {});
+    setFieldWidthMap(template.fieldWidthMap || {});
+    setValidationExpanded(template.validationExpanded || {});
+    setRequiredMap(template.requiredMap || {});
+    setValidationRulesMap(template.validationRulesMap || {});
+    setRuleMenuOpen(template.ruleMenuOpen || {});
+    setConditionalExpanded(template.conditionalExpanded || {});
+    setConditionalEnabled(template.conditionalEnabled || {});
+    setConditionalAction(template.conditionalAction || {});
+    setConditionalField(template.conditionalField || {});
+    setConditionalCondition(template.conditionalCondition || {});
+    setConditionalValue(template.conditionalValue || {});
+    setDefaultValueMap(template.defaultValueMap || {});
+    setExpandedFieldId(null);
+    setShowFieldSelector(false);
+    setIsPreview(false);
+  };
+
+  useEffect(() => {
+    const loadLatestTemplate = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const response = await getMyFormTemplates();
+        const latestTemplate = response.data?.[0];
+
+        if (latestTemplate) {
+          setActiveTemplateId(latestTemplate._id);
+          loadTemplateIntoState(latestTemplate);
+        }
+      } catch (error) {
+        console.error("Failed to load form templates:", error);
+      }
+    };
+
+    loadLatestTemplate();
+  }, []);
 
   const handleFieldTypeSelect = (field) => {
     setFormFields((prev) => [
@@ -116,9 +186,49 @@ function Builder() {
 
   const handleSave = async () => {
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    setIsSaving(false);
-    triggerToast("Form saved (frontend-only mode)");
+
+    try {
+      if (!formName.trim()) {
+        triggerToast("Please enter a form name before saving.");
+        return;
+      }
+
+      const payload = buildTemplatePayload({
+        formName,
+        formDescription,
+        formFields,
+        placeholderMap,
+        helpTextMap,
+        fieldWidthMap,
+        validationExpanded,
+        requiredMap,
+        validationRulesMap,
+        ruleMenuOpen,
+        conditionalExpanded,
+        conditionalEnabled,
+        conditionalAction,
+        conditionalField,
+        conditionalCondition,
+        conditionalValue,
+        defaultValueMap,
+      });
+
+      const response = activeTemplateId
+        ? await updateFormTemplate(activeTemplateId, payload)
+        : await createFormTemplate(payload);
+
+      const savedTemplate = response.data;
+      if (savedTemplate?._id) {
+        setActiveTemplateId(savedTemplate._id);
+      }
+
+      triggerToast(response.message || "Form saved successfully.");
+    } catch (error) {
+      console.error("Save form template error:", error);
+      triggerToast(error.message || "Failed to save form.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const totalFields = formFields.length;
