@@ -77,6 +77,13 @@ const TAB_CONFIG = {
   },
 };
 
+const getRouteFromPath = () => {
+  const path = window.location.pathname.toLowerCase().replace(/\/$/, "");
+  if (path === "/login" || path === "/signin") return "login";
+  if (path === "/signup" || path === "/register") return "signup";
+  return "landing";
+};
+
 export default function App() {
   const [selectedRole, setSelectedRole] = useState("ic");
   const [activeTab, setActiveTab] = useState("submissions");
@@ -87,9 +94,24 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [unauthView, setUnauthView] = useState("landing"); // "landing" | "login" | "register"
+  const [unauthView, setUnauthView] = useState(getRouteFromPath()); // "landing" | "login" | "signup"
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+
+  const navigateTo = (path, viewMode) => {
+    setUnauthView(viewMode);
+    if (window.location.pathname !== path) {
+      window.history.pushState({}, "", path);
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setUnauthView(getRouteFromPath());
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   const [reviewData, setReviewData] = useState({
     reviewPeriod: "",
@@ -332,6 +354,15 @@ export default function App() {
     setIsAuthenticated(true);
     localStorage.setItem("user", JSON.stringify(formattedUser));
     console.log("Logged in user:", formattedUser);
+
+    if (
+      window.location.pathname.toLowerCase() === "/login" ||
+      window.location.pathname.toLowerCase() === "/signin" ||
+      window.location.pathname.toLowerCase() === "/signup" ||
+      window.location.pathname.toLowerCase() === "/register"
+    ) {
+      window.history.pushState({}, "", "/");
+    }
   };
 
   const handleLogout = () => {
@@ -340,7 +371,7 @@ export default function App() {
     setCurrentUser(null);
     setIsAuthenticated(false);
     setSubmissions([]);
-    setUnauthView("landing");
+    navigateTo("/", "landing");
   };
 
   const handleViewDetails = (submission) => {
@@ -425,16 +456,16 @@ export default function App() {
     if (unauthView === "landing") {
       return (
         <LandingPage
-          onGetStarted={() => setUnauthView("register")}
-          onLogin={() => setUnauthView("login")}
+          onGetStarted={() => navigateTo("/signup", "signup")}
+          onLogin={() => navigateTo("/login", "login")}
         />
       );
     }
     return (
       <AuthView
-        initialMode={unauthView}
+        initialMode={unauthView === "signup" ? "register" : "login"}
         onLogin={handleLogin}
-        onBackToLanding={() => setUnauthView("landing")}
+        onBackToLanding={() => navigateTo("/", "landing")}
       />
     );
   }

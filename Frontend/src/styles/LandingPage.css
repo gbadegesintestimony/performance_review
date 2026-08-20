@@ -5,16 +5,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --lp-bg-main: #0a0f1d;
-  --lp-bg-card: rgba(18, 26, 47, 0.7);
-  --lp-bg-card-hover: rgba(28, 39, 68, 0.85);
-  --lp-border: rgba(255, 255, 255, 0.08);
-  --lp-border-glow: rgba(99, 102, 241, 0.4);
-  --lp-primary: #6366f1;
-  --lp-primary-hover: #4f46e5;
-  --lp-primary-glow: rgba(99, 102, 241, 0.35);
-  --lp-secondary: #06b6d4;
-  --lp-accent: #ec4899;
+  --lp-bg-main: #0f1422;
+  --lp-bg-card: rgba(22, 30, 52, 0.75);
+  --lp-bg-card-hover: rgba(30, 42, 74, 0.9);
+  --lp-border: rgba(255, 255, 255, 0.09);
+  --lp-border-glow: rgba(102, 126, 234, 0.45);
+  --lp-primary: #667eea;
+  --lp-primary-hover: #5a67d8;
+  --lp-primary-glow: rgba(102, 126, 234, 0.4);
+  --lp-accent: #764ba2;
+  --lp-teal: #2d9d8e;
+  --lp-secondary: #14b8a6;
   --lp-emerald: #10b981;
   --lp-amber: #f59e0b;
   --lp-text-title: #f8fafc;

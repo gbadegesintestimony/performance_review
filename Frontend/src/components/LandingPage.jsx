@@ -72,7 +72,7 @@ export default function LandingPage({ onGetStarted, onLogin }) {
             <div className="brand-icon">
               <TrendingUp size={22} />
             </div>
-            <span className="brand-name">DevTrack Review</span>
+            <span className="brand-name">Performance Review</span>
           </div>
 
           <ul className="nav-links">
@@ -507,7 +507,7 @@ export default function LandingPage({ onGetStarted, onLogin }) {
         <div className="cta-banner-card">
           <h2 className="cta-banner-title">Ready to Elevate Your Team's Performance?</h2>
           <p className="cta-banner-subtitle">
-            Join forward-thinking companies using DevTrack Review to cultivate growth, accountability, and excellence.
+            Join forward-thinking companies using Performance Review to cultivate growth, accountability, and excellence.
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>
             <button
@@ -536,7 +536,7 @@ export default function LandingPage({ onGetStarted, onLogin }) {
               <div className="brand-icon">
                 <TrendingUp size={20} />
               </div>
-              <span className="brand-name">DevTrack Review</span>
+              <span className="brand-name">Performance Review</span>
             </div>
             <div className="footer-tagline">
               Next-generation performance reviews and team growth platform.
@@ -552,7 +552,7 @@ export default function LandingPage({ onGetStarted, onLogin }) {
         </div>
 
         <div className="footer-bottom">
-          &copy; {new Date().getFullYear()} DevTrack Review System. All rights reserved.
+          &copy; {new Date().getFullYear()} Performance Review. All rights reserved.
         </div>
       </footer>
     </div>

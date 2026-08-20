@@ -182,8 +182,16 @@ const AuthView = ({ onLogin, initialMode = "login", onBackToLanding }) => {
     }
   };
 
+  React.useEffect(() => {
+    setIsLogin(initialMode !== "register");
+  }, [initialMode]);
+
   const toggleMode = () => {
-    setIsLogin(!isLogin);
+    const nextIsLogin = !isLogin;
+    setIsLogin(nextIsLogin);
+    if (window.history.pushState) {
+      window.history.pushState({}, "", nextIsLogin ? "/login" : "/signup");
+    }
     setErrors({});
     setFormData({
       email: "",
