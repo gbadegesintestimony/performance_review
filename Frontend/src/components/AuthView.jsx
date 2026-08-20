@@ -208,32 +208,6 @@ const AuthView = ({ onLogin, initialMode = "login", onBackToLanding }) => {
   return (
     <div className="auth-container">
       <div className="auth-wrapper">
-        {onBackToLanding && (
-          <button
-            type="button"
-            className="auth-back-btn"
-            onClick={onBackToLanding}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              background: "transparent",
-              border: "none",
-              color: "#64748b",
-              cursor: "pointer",
-              fontSize: "0.9rem",
-              fontWeight: "600",
-              marginBottom: "1rem",
-              padding: "0.4rem 0.6rem",
-              borderRadius: "6px",
-              transition: "all 0.2s ease"
-            }}
-            onMouseOver={(e) => (e.currentTarget.style.color = "#0f172a")}
-            onMouseOut={(e) => (e.currentTarget.style.color = "#64748b")}
-          >
-            ← Back to Home
-          </button>
-        )}
         <div className="auth-card">
           <div className="auth-header">
             <div className="auth-logo">

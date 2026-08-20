@@ -509,7 +509,7 @@ export default function LandingPage({ onGetStarted, onLogin }) {
           <p className="cta-banner-subtitle">
             Join forward-thinking companies using Performance Review to cultivate growth, accountability, and excellence.
           </p>
-          <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", justifyContent: "flex-start", gap: "1.25rem", flexWrap: "wrap" }}>
             <button
               id="cta-bottom-register"
               className="btn-primary-hero"
