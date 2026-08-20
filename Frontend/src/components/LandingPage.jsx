@@ -190,7 +190,7 @@ export default function LandingPage({ onGetStarted, onLogin }) {
             <div className="mock-goal-item">
               <div className="mock-goal-header">
                 <span>Migrate Core Auth to JWT Microservice</span>
-                <span style={{ color: "#38bdf8" }}>95%</span>
+                <span style={{ color: "#2d9d8e", fontWeight: "700" }}>95%</span>
               </div>
               <div className="mock-progress-bar">
                 <div className="mock-progress-fill" style={{ width: "95%" }}></div>
@@ -199,10 +199,10 @@ export default function LandingPage({ onGetStarted, onLogin }) {
             <div className="mock-goal-item">
               <div className="mock-goal-header">
                 <span>Improve Test Coverage to 90%</span>
-                <span style={{ color: "#34d399" }}>85%</span>
+                <span style={{ color: "#2d9d8e", fontWeight: "700" }}>85%</span>
               </div>
               <div className="mock-progress-bar">
-                <div className="mock-progress-fill" style={{ width: "85%", background: "linear-gradient(90deg, #10b981, #06b6d4)" }}></div>
+                <div className="mock-progress-fill" style={{ width: "85%" }}></div>
               </div>
             </div>
           </div>
@@ -403,20 +403,20 @@ export default function LandingPage({ onGetStarted, onLogin }) {
                   width: "12px",
                   height: "12px",
                   borderRadius: "50%",
-                  backgroundColor: activeRoleTab === "ic" ? "#6366f1" : "#10b981"
+                  backgroundColor: "#2d9d8e"
                 }}></div>
-                <strong style={{ fontSize: "0.95rem", color: "#fff" }}>
+                <strong style={{ fontSize: "1rem", color: "#1a202c" }}>
                   {activeRoleTab === "ic" ? "Employee Appraisal Workflow" : "Manager Evaluation Panel"}
                 </strong>
               </div>
-              <p style={{ fontSize: "0.85rem", color: "#94a3b8", lineHeight: "1.6", marginBottom: "1.25rem" }}>
+              <p style={{ fontSize: "0.95rem", color: "#4a5568", lineHeight: "1.6", marginBottom: "1.5rem" }}>
                 {activeRoleTab === "ic"
                   ? "Employees have a streamlined submission flow with interactive goal inputs, competency sliders, and narrative reflection textareas."
                   : "Managers get an organized queue of pending team submissions, quick one-click modal review, and instant grading tools."}
               </p>
               <button
                 className="btn-primary-hero"
-                style={{ width: "100%", justifyContent: "center", padding: "0.75rem 1rem", fontSize: "0.95rem" }}
+                style={{ width: "100%", justifyContent: "center", padding: "0.85rem 1.25rem", fontSize: "1rem" }}
                 onClick={onGetStarted}
               >
                 Experience {activeRoleTab === "ic" ? "Employee" : "Manager"} View <ArrowRight size={16} />
