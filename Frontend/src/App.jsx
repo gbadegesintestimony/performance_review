@@ -9,6 +9,7 @@ import {
 } from "./api/submissionApi";
 
 import AuthView from "./components/AuthView";
+import LandingPage from "./components/LandingPage";
 import Header from "./components/Header";
 import TabNavigation from "./components/TabNavigation";
 import NotificationPanel from "./components/NotificationPanel";
@@ -86,6 +87,7 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [unauthView, setUnauthView] = useState("landing"); // "landing" | "login" | "register"
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
@@ -338,6 +340,7 @@ export default function App() {
     setCurrentUser(null);
     setIsAuthenticated(false);
     setSubmissions([]);
+    setUnauthView("landing");
   };
 
   const handleViewDetails = (submission) => {
@@ -418,7 +421,23 @@ export default function App() {
   };
 
   if (authLoading) return <div className="loading-screen">Loading...</div>;
-  if (!isAuthenticated) return <AuthView onLogin={handleLogin} />;
+  if (!isAuthenticated) {
+    if (unauthView === "landing") {
+      return (
+        <LandingPage
+          onGetStarted={() => setUnauthView("register")}
+          onLogin={() => setUnauthView("login")}
+        />
+      );
+    }
+    return (
+      <AuthView
+        initialMode={unauthView}
+        onLogin={handleLogin}
+        onBackToLanding={() => setUnauthView("landing")}
+      />
+    );
+  }
 
   return (
     <div className="page-wrapper">
